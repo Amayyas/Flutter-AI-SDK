@@ -1,0 +1,63 @@
+# Dart/Flutter specific
+.dart_tool/
+.packages
+build/
+.pub-cache/
+.pub/
+pubspec.lock
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Coverage
+coverage/
+.coverage
+*.lcov
+
+# Logs
+*.log
+logs/
+
+# Environment/Secrets - IMPORTANT: Ne jamais commit les clés API !
+.env
+.env.*
+*.env
+secrets.dart
+secrets/
+config.local.dart
+
+# Test artifacts
+.test_coverage/
+
+# Build outputs
+*.js
+*.js.map
+*.js.deps
+*.dart.js
+
+# Documentation generated
+doc/api/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
