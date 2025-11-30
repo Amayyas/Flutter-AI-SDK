@@ -1,0 +1,36 @@
+name: flutter_ai_sdk
+description: A unified wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
+version: 1.0.0
+homepage: https://github.com/Amayyas/Flutter-AI-SDK
+repository: https://github.com/Amayyas/Flutter-AI-SDK
+issue_tracker: https://github.com/Amayyas/Flutter-AI-SDK/issues
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  dio: ^5.4.0
+  json_annotation: ^4.8.1
+  equatable: ^2.0.5
+  uuid: ^4.2.1
+  mime: ^1.0.4
+  path: ^1.8.3
+  collection: ^1.18.0
+  meta: ^1.11.0
+  rxdart: ^0.27.7
+  logger: ^2.0.2
+  retry: ^3.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  mockito: ^5.4.4
+  mocktail: ^1.0.1
+  test: ^1.24.9
