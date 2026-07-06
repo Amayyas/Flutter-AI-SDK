@@ -22,7 +22,7 @@
 ///   provider: AIProvider.openai,
 ///   config: AIConfig(
 ///     apiKey: 'your-api-key',
-///     model: 'gpt-4',
+///     model: 'gpt-5.5',
 ///   ),
 /// );
 ///
@@ -40,9 +40,9 @@
 ///
 /// The SDK supports the following AI providers:
 ///
-/// - **OpenAI**: GPT-4, GPT-3.5-turbo, and other models
-/// - **Anthropic**: Claude 3 (Opus, Sonnet, Haiku)
-/// - **Google AI**: Gemini Pro, Gemini Pro Vision
+/// - **OpenAI**: GPT-5.5, GPT-5.4, and other models
+/// - **Anthropic**: Claude (Opus 4.8, Sonnet 5, Haiku 4.5)
+/// - **Google AI**: Gemini 3.x family
 ///
 /// ## Configuration
 ///
@@ -51,7 +51,7 @@
 /// ```dart
 /// final config = AIConfig(
 ///   apiKey: 'your-api-key',
-///   model: 'gpt-4-turbo',
+///   model: 'gpt-5.5',
 ///   maxTokens: 4096,
 ///   temperature: 0.7,
 ///   systemPrompt: 'You are a helpful assistant.',
@@ -73,23 +73,18 @@
 ///   print('AI error: ${e.message}');
 /// }
 /// ```
-library flutter_ai_sdk;
+library;
 
-// Core exports
-export 'src/flutter_ai.dart';
 export 'src/config/ai_config.dart';
-
-// Models
-export 'src/models/models.dart';
-
-// Providers
-export 'src/providers/providers.dart';
-
 // Context Management
 export 'src/context/context.dart';
-
 // Errors
 export 'src/errors/errors.dart';
-
+// Core exports
+export 'src/flutter_ai.dart';
+// Models
+export 'src/models/models.dart';
+// Providers
+export 'src/providers/providers.dart';
 // Utils
 export 'src/utils/utils.dart';

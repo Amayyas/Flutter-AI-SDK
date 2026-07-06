@@ -11,7 +11,7 @@ import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 
 /// OpenAI API provider implementation.
 ///
-/// Supports GPT-4, GPT-3.5, and other OpenAI models with full
+/// Supports GPT-5.x and other OpenAI models with full
 /// support for streaming, vision, and function calling.
 ///
 /// Example:
@@ -19,7 +19,7 @@ import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 /// final provider = OpenAIProvider(
 ///   AIConfig(
 ///     apiKey: 'sk-...',
-///     model: 'gpt-4-turbo',
+///     model: 'gpt-5.5',
 ///   ),
 /// );
 ///
@@ -173,7 +173,7 @@ class OpenAIProvider extends BaseProvider {
                   'name': tc.name,
                   'arguments': jsonEncode(tc.arguments),
                 },
-              })
+              },)
           .toList();
     }
 
