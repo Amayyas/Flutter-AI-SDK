@@ -11,13 +11,13 @@ import 'package:flutter_ai_sdk/src/models/tool.dart';
 /// ```dart
 /// final config = AIConfig(
 ///   apiKey: 'your-api-key',
-///   model: 'gpt-4-turbo',
+///   model: 'gpt-5.5',
 ///   maxTokens: 4096,
 ///   temperature: 0.7,
 ///   systemPrompt: 'You are a helpful assistant.',
 /// );
 /// ```
-class AIConfig with EquatableMixin {
+class AIConfig with Equatable {
   /// Creates an [AIConfig].
   const AIConfig({
     required this.apiKey,
@@ -41,7 +41,7 @@ class AIConfig with EquatableMixin {
   /// API key for authentication.
   final String apiKey;
 
-  /// The model to use (e.g., 'gpt-4', 'claude-3-opus').
+  /// The model to use (e.g., 'gpt-5.5', 'claude-opus-4-8').
   final String? model;
 
   /// Maximum number of tokens to generate.
@@ -170,7 +170,7 @@ class AIConfig with EquatableMixin {
 /// Response format configuration.
 ///
 /// Controls the format of the model's output.
-sealed class ResponseFormat with EquatableMixin {
+sealed class ResponseFormat with Equatable {
   /// Creates a [ResponseFormat].
   const ResponseFormat();
 
@@ -220,13 +220,13 @@ class DefaultModels {
   DefaultModels._();
 
   /// Default OpenAI model.
-  static const String openai = 'gpt-4-turbo';
+  static const String openai = 'gpt-5.5';
 
   /// Default Anthropic model.
-  static const String anthropic = 'claude-3-5-sonnet-latest';
+  static const String anthropic = 'claude-opus-4-8';
 
   /// Default Google AI model.
-  static const String googleAI = 'gemini-1.5-pro';
+  static const String googleAI = 'gemini-3.5-flash';
 
   /// Gets the default model for a provider.
   static String forProvider(AIProvider provider) => switch (provider) {

@@ -97,39 +97,41 @@ class ModelContextLimits {
 
   /// OpenAI model limits.
   static const Map<String, int> openai = {
-    'gpt-4-turbo': 128000,
-    'gpt-4-turbo-preview': 128000,
-    'gpt-4-0125-preview': 128000,
-    'gpt-4-1106-preview': 128000,
-    'gpt-4': 8192,
-    'gpt-4-0613': 8192,
-    'gpt-4-32k': 32768,
-    'gpt-3.5-turbo': 16385,
-    'gpt-3.5-turbo-16k': 16385,
-    'gpt-3.5-turbo-0125': 16385,
+    'gpt-5.5': 400000,
+    'gpt-5.4': 400000,
+    'gpt-5.4-mini': 400000,
+    'gpt-5.4-nano': 400000,
+    'gpt-5.1': 400000,
+    'gpt-5': 400000,
+    // Legacy models (deprecated by OpenAI)
     'gpt-4o': 128000,
     'gpt-4o-mini': 128000,
+    'gpt-4-turbo': 128000,
+    'gpt-4': 8192,
+    'gpt-3.5-turbo': 16385,
   };
 
   /// Anthropic model limits.
   static const Map<String, int> anthropic = {
-    'claude-3-opus-20240229': 200000,
-    'claude-3-sonnet-20240229': 200000,
-    'claude-3-haiku-20240307': 200000,
-    'claude-3-5-sonnet-20240620': 200000,
-    'claude-3-5-sonnet-latest': 200000,
-    'claude-2.1': 200000,
-    'claude-2.0': 100000,
-    'claude-instant-1.2': 100000,
+    'claude-opus-4-8': 1000000,
+    'claude-opus-4-7': 1000000,
+    'claude-opus-4-6': 1000000,
+    'claude-sonnet-5': 1000000,
+    'claude-sonnet-4-6': 1000000,
+    'claude-haiku-4-5': 200000,
+    // Legacy models
+    'claude-opus-4-5': 200000,
+    'claude-sonnet-4-5': 200000,
   };
 
   /// Google AI model limits.
   static const Map<String, int> googleAI = {
-    'gemini-1.5-pro': 2097152, // 2M tokens
-    'gemini-1.5-flash': 1048576, // 1M tokens
-    'gemini-1.0-pro': 32760,
-    'gemini-pro': 32760,
-    'gemini-pro-vision': 16384,
+    'gemini-3.5-flash': 1048576, // 1M tokens
+    'gemini-3.1-pro-preview': 1048576,
+    'gemini-3.1-flash-lite': 1048576,
+    // Legacy models
+    'gemini-2.5-pro': 1048576,
+    'gemini-2.5-flash': 1048576,
   };
 
   /// Gets the context limit for a model.
