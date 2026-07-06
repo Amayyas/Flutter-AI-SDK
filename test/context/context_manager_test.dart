@@ -100,7 +100,6 @@ void main() {
         final cm = ContextManager(
           maxTokens: 100, // Low limit to force truncation
           reservedTokens: 0,
-          windowStrategy: WindowStrategy.slidingWindow,
         );
 
         // Add many messages

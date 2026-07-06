@@ -213,7 +213,7 @@ class ContextManager {
       type: type,
       messageCount: _conversation.length,
       estimatedTokens: estimatedTokens,
-    ));
+    ),);
   }
 
   /// Disposes resources.

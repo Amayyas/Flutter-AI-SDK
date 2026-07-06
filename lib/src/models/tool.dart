@@ -24,7 +24,7 @@ import 'package:equatable/equatable.dart';
 ///   ),
 /// );
 /// ```
-class Tool with EquatableMixin {
+class Tool with Equatable {
   /// Creates a [Tool] definition.
   const Tool({
     required this.name,
@@ -82,7 +82,7 @@ class Tool with EquatableMixin {
 /// Parameters schema for a tool.
 ///
 /// Follows JSON Schema format for defining tool parameters.
-class ToolParameters with EquatableMixin {
+class ToolParameters with Equatable {
   /// Creates [ToolParameters].
   const ToolParameters({
     required this.properties,
@@ -116,7 +116,7 @@ class ToolParameters with EquatableMixin {
 /// A property in a tool's parameter schema.
 ///
 /// Represents a single parameter that a tool accepts.
-sealed class ToolProperty with EquatableMixin {
+sealed class ToolProperty with Equatable {
   /// Creates a [ToolProperty].
   const ToolProperty({
     required this.type,
@@ -302,7 +302,7 @@ final class EnumToolProperty extends ToolProperty {
 /// Configuration for tool choice behavior.
 ///
 /// Controls how the model uses tools.
-sealed class ToolChoice with EquatableMixin {
+sealed class ToolChoice with Equatable {
   /// Creates a [ToolChoice].
   const ToolChoice();
 

@@ -1,8 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:uuid/uuid.dart';
-
 import 'package:flutter_ai_sdk/src/models/content.dart';
 import 'package:flutter_ai_sdk/src/models/enums.dart';
+import 'package:uuid/uuid.dart';
 
 /// Represents a message in a conversation.
 ///
@@ -23,18 +22,49 @@ import 'package:flutter_ai_sdk/src/models/enums.dart';
 /// // System message
 /// final system = Message.system('You are a helpful assistant.');
 /// ```
-class Message with EquatableMixin {
+class Message with Equatable {
   /// Creates a [Message] with the given properties.
   Message({
-    String? id,
-    required this.role,
-    required this.content,
+    required this.role, required this.content, String? id,
     this.name,
     this.toolCalls,
     DateTime? createdAt,
     this.metadata,
   })  : id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now();
+
+  /// Creates a [Message] from a JSON map.
+  factory Message.fromJson(Map<String, dynamic> json) {
+    final roleStr = json['role'] as String;
+    final role = MessageRole.values.firstWhere(
+      (r) => r.name == roleStr,
+      orElse: () => MessageRole.user,
+    );
+
+    final contentList = json['content'];
+    List<Content> content;
+
+    if (contentList is String) {
+      content = [TextContent(contentList)];
+    } else if (contentList is List) {
+      content = contentList
+          .map((c) => _parseContent(c as Map<String, dynamic>))
+          .toList();
+    } else {
+      content = [];
+    }
+
+    return Message(
+      id: json['id'] as String?,
+      role: role,
+      content: content,
+      name: json['name'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
 
   /// Creates a user message with text content.
   factory Message.user(dynamic content, {String? name}) => Message(
@@ -45,7 +75,7 @@ class Message with EquatableMixin {
 
   /// Creates an assistant message with text content.
   factory Message.assistant(dynamic content,
-          {List<ToolCallContent>? toolCalls}) =>
+          {List<ToolCallContent>? toolCalls,}) =>
       Message(
         role: MessageRole.assistant,
         content: _normalizeContent(content),
@@ -144,39 +174,6 @@ class Message with EquatableMixin {
         'created_at': createdAt.toIso8601String(),
         if (metadata != null) 'metadata': metadata,
       };
-
-  /// Creates a [Message] from a JSON map.
-  factory Message.fromJson(Map<String, dynamic> json) {
-    final roleStr = json['role'] as String;
-    final role = MessageRole.values.firstWhere(
-      (r) => r.name == roleStr,
-      orElse: () => MessageRole.user,
-    );
-
-    final contentList = json['content'];
-    List<Content> content;
-
-    if (contentList is String) {
-      content = [TextContent(contentList)];
-    } else if (contentList is List) {
-      content = contentList
-          .map((c) => _parseContent(c as Map<String, dynamic>))
-          .toList();
-    } else {
-      content = [];
-    }
-
-    return Message(
-      id: json['id'] as String?,
-      role: role,
-      content: content,
-      name: json['name'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
-  }
 
   /// Normalizes content to a list of [Content].
   static List<Content> _normalizeContent(dynamic content) {

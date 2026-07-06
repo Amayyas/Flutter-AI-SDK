@@ -176,11 +176,11 @@ void main() {
 
       test('equality', () {
         const c1 = AudioContent.fromUrl('https://example.com/a.mp3',
-            mimeType: 'audio/mpeg');
+            mimeType: 'audio/mpeg',);
         const c2 = AudioContent.fromUrl('https://example.com/a.mp3',
-            mimeType: 'audio/mpeg');
+            mimeType: 'audio/mpeg',);
         const c3 = AudioContent.fromUrl('https://example.com/b.mp3',
-            mimeType: 'audio/mpeg');
+            mimeType: 'audio/mpeg',);
 
         expect(c1, equals(c2));
         expect(c1, isNot(equals(c3)));

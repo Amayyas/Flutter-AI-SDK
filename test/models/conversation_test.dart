@@ -69,7 +69,7 @@ void main() {
       final conversation = Conversation(messages: [
         Message.user('Hello'),
         Message.assistant('Hi!'),
-      ]);
+      ],);
 
       conversation.clear();
 
@@ -97,7 +97,7 @@ void main() {
         Message.user('3'),
         Message.assistant('4'),
         Message.user('5'),
-      ]);
+      ],);
 
       conversation.truncate(3);
 
@@ -110,7 +110,7 @@ void main() {
       final conversation = Conversation(messages: [
         Message.user('1'),
         Message.assistant('2'),
-      ]);
+      ],);
 
       conversation.truncate(10);
 
@@ -123,7 +123,7 @@ void main() {
         Message.assistant('2'),
         Message.user('3'),
         Message.assistant('4'),
-      ]);
+      ],);
 
       final last2 = conversation.getLastMessages(2);
 

@@ -163,6 +163,17 @@ class IndexedConversation {
     this.archived = false,
   });
 
+  /// Creates from a JSON map.
+  factory IndexedConversation.fromJson(Map<String, dynamic> json) =>
+      IndexedConversation(
+        conversation:
+            Conversation.fromJson(json['conversation'] as Map<String, dynamic>),
+        tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
+        summary: json['summary'] as String?,
+        pinned: json['pinned'] as bool? ?? false,
+        archived: json['archived'] as bool? ?? false,
+      );
+
   /// The underlying conversation.
   final Conversation conversation;
 
@@ -214,15 +225,4 @@ class IndexedConversation {
         'pinned': pinned,
         'archived': archived,
       };
-
-  /// Creates from a JSON map.
-  factory IndexedConversation.fromJson(Map<String, dynamic> json) =>
-      IndexedConversation(
-        conversation:
-            Conversation.fromJson(json['conversation'] as Map<String, dynamic>),
-        tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
-        summary: json['summary'] as String?,
-        pinned: json['pinned'] as bool? ?? false,
-        archived: json['archived'] as bool? ?? false,
-      );
 }

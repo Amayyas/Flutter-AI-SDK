@@ -12,13 +12,20 @@ import 'package:equatable/equatable.dart';
 /// print('Completion tokens: ${response.usage?.completionTokens}');
 /// print('Total: ${response.usage?.totalTokens}');
 /// ```
-class Usage with EquatableMixin {
+class Usage with Equatable {
   /// Creates a [Usage] instance.
   const Usage({
     required this.promptTokens,
     required this.completionTokens,
     this.cachedTokens,
   });
+
+  /// Creates a [Usage] from a JSON map.
+  factory Usage.fromJson(Map<String, dynamic> json) => Usage(
+        promptTokens: json['prompt_tokens'] as int? ?? 0,
+        completionTokens: json['completion_tokens'] as int? ?? 0,
+        cachedTokens: json['cached_tokens'] as int?,
+      );
 
   /// Number of tokens in the prompt.
   final int promptTokens;
@@ -31,13 +38,6 @@ class Usage with EquatableMixin {
 
   /// Total number of tokens (prompt + completion).
   int get totalTokens => promptTokens + completionTokens;
-
-  /// Creates a [Usage] from a JSON map.
-  factory Usage.fromJson(Map<String, dynamic> json) => Usage(
-        promptTokens: json['prompt_tokens'] as int? ?? 0,
-        completionTokens: json['completion_tokens'] as int? ?? 0,
-        cachedTokens: json['cached_tokens'] as int?,
-      );
 
   /// Converts to a JSON-serializable map.
   Map<String, dynamic> toJson() => {
@@ -77,7 +77,7 @@ class Usage with EquatableMixin {
 /// Detailed cost information for an AI request.
 ///
 /// Provides estimated costs based on token usage and model pricing.
-class CostInfo with EquatableMixin {
+class CostInfo with Equatable {
   /// Creates a [CostInfo] instance.
   const CostInfo({
     required this.promptCost,
