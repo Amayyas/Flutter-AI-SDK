@@ -2,7 +2,7 @@
 
 A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
 
 ## Features
 
@@ -50,7 +50,7 @@ final ai = FlutterAI(
   provider: AIProvider.openai,
   config: AIConfig(
     apiKey: 'your-api-key',
-    model: 'gpt-4-turbo',
+    model: 'gpt-5.5',
   ),
 );
 
@@ -69,7 +69,7 @@ final ai = FlutterAI(
   provider: AIProvider.anthropic,
   config: AIConfig(
     apiKey: 'your-api-key',
-    model: 'claude-3-5-sonnet-latest',
+    model: 'claude-opus-4-8',
   ),
 );
 
@@ -108,7 +108,7 @@ final ai = FlutterAI(
   provider: AIProvider.openai,
   config: AIConfig(
     apiKey: 'your-api-key',
-    model: 'gpt-4-turbo',
+    model: 'gpt-5.5',
   ),
 );
 
@@ -197,7 +197,7 @@ final config = AIConfig(
   apiKey: 'your-api-key',
   
   // Model selection
-  model: 'gpt-4-turbo', // Provider-specific model name
+  model: 'gpt-5.5', // Provider-specific model name
   
   // Generation parameters
   maxTokens: 4096,
@@ -285,12 +285,12 @@ final ai = FlutterAI(
   provider: AIProvider.openai,
   config: AIConfig(
     apiKey: 'sk-...',
-    model: 'gpt-4-turbo', // or gpt-4, gpt-3.5-turbo, etc.
+    model: 'gpt-5.5', // or gpt-5.4, gpt-5.4-mini, etc.
   ),
 );
 ```
 
-Supported models: `gpt-4-turbo`, `gpt-4`, `gpt-3.5-turbo`, `gpt-4o`, `gpt-4o-mini`
+Supported models: `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`, `gpt-5.1`
 
 ### Anthropic (Claude)
 
@@ -299,12 +299,12 @@ final ai = FlutterAI(
   provider: AIProvider.anthropic,
   config: AIConfig(
     apiKey: 'sk-ant-...',
-    model: 'claude-3-5-sonnet-latest',
+    model: 'claude-opus-4-8',
   ),
 );
 ```
 
-Supported models: `claude-3-opus-20240229`, `claude-3-sonnet-20240229`, `claude-3-haiku-20240307`, `claude-3-5-sonnet-latest`
+Supported models: `claude-opus-4-8`, `claude-sonnet-5`, `claude-sonnet-4-6`, `claude-haiku-4-5`
 
 ### Google AI (Gemini)
 
@@ -313,12 +313,12 @@ final ai = FlutterAI(
   provider: AIProvider.googleAI,
   config: AIConfig(
     apiKey: 'your-google-ai-key',
-    model: 'gemini-1.5-pro',
+    model: 'gemini-3.5-flash',
   ),
 );
 ```
 
-Supported models: `gemini-1.5-pro`, `gemini-1.5-flash`, `gemini-1.0-pro`
+Supported models: `gemini-3.5-flash`, `gemini-3.1-pro-preview`, `gemini-3.1-flash-lite`
 
 ## Flutter Widget Integration
 
