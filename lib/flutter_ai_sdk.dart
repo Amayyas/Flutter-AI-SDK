@@ -75,7 +75,7 @@
 /// ```
 library;
 
-export 'src/config/ai_config.dart';
+export 'src/config/config.dart';
 // Context Management
 export 'src/context/context.dart';
 // Errors
@@ -86,5 +86,8 @@ export 'src/flutter_ai.dart';
 export 'src/models/models.dart';
 // Providers
 export 'src/providers/providers.dart';
+
+// Tool runner exports
+export 'src/runner/runner.dart';
 // Utils
 export 'src/utils/utils.dart';

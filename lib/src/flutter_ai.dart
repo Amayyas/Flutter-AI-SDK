@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_ai_sdk/src/config/ai_config.dart';
+import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/context/context_manager.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
 import 'package:flutter_ai_sdk/src/providers/providers.dart';
@@ -85,7 +85,7 @@ class FlutterAI {
             ContextManager(
               systemPrompt: config.systemPrompt,
             ),
-        _provider = customProvider ?? _createProvider(provider, config);
+        _provider = customProvider ?? ProviderRegistry.create(provider, config);
 
   /// The provider type.
   final AIProvider _providerType;
@@ -111,17 +111,6 @@ class FlutterAI {
   /// Gets the current conversation.
   Conversation get conversation => _contextManager.conversation;
 
-  /// Creates the appropriate provider.
-  static BaseProvider _createProvider(AIProvider provider, AIConfig config) {
-    switch (provider) {
-      case AIProvider.openai:
-        return OpenAIProvider(config);
-      case AIProvider.anthropic:
-        return AnthropicProvider(config);
-      case AIProvider.googleAI:
-        return GoogleAIProvider(config);
-    }
-  }
 
   /// Sends a simple text message and gets a response.
   ///
@@ -220,7 +209,7 @@ class FlutterAI {
     );
 
     // Create a temporary provider with the tool config
-    final toolProvider = _createProvider(_providerType, toolConfig);
+    final toolProvider = ProviderRegistry.create(_providerType, toolConfig);
 
     if (addToContext) {
       _contextManager.addUserMessage(message);
@@ -390,7 +379,7 @@ extension FlutterAIExtensions on FlutterAI {
       responseFormat: const JsonResponseFormat(),
     );
 
-    final jsonProvider = FlutterAI._createProvider(provider, jsonConfig);
+    final jsonProvider = ProviderRegistry.create(provider, jsonConfig);
 
     if (addToContext) {
       context.addUserMessage(message);

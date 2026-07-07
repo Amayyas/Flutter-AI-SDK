@@ -1,10 +1,15 @@
-import 'package:flutter_ai_sdk/src/config/ai_config.dart';
+import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
+import 'package:meta/meta.dart';
 
 /// Base class for AI providers.
 ///
 /// Defines the contract that all provider implementations must follow.
 /// Each provider handles communication with a specific AI service.
+///
+/// Streaming follows the template method pattern: [streamChat] implements
+/// the shared accumulation loop, while subclasses provide the transport
+/// via [openStream] and the wire-format decoding via [parseStreamChunk].
 ///
 /// Example:
 /// ```dart
@@ -12,12 +17,11 @@ import 'package:flutter_ai_sdk/src/models/models.dart';
 ///   CustomProvider(super.config);
 ///
 ///   @override
-///   AIProvider get providerType => AIProvider.custom;
-///
-///   @override
 ///   Future<AIResponse> chat(List<Message> messages) async {
 ///     // Implementation
 ///   }
+///
+///   // ... openStream, parseStreamChunk, metadata getters
 /// }
 /// ```
 abstract class BaseProvider {
@@ -46,7 +50,50 @@ abstract class BaseProvider {
   ///
   /// [messages] is the list of messages in the conversation.
   /// Yields [StreamChunk] objects as the response is generated.
-  Stream<StreamChunk> streamChat(List<Message> messages);
+  ///
+  /// This is a template method: it validates the configuration, opens the
+  /// provider-specific stream via [openStream], decodes each raw chunk via
+  /// [parseStreamChunk], and always terminates with a final done chunk that
+  /// carries the accumulated finish reason and usage.
+  Stream<StreamChunk> streamChat(List<Message> messages) async* {
+    validateConfig();
+
+    yield const StreamChunk.start();
+
+    FinishReason? finishReason;
+    Usage? usage;
+
+    await for (final rawChunk in openStream(messages)) {
+      final parsed = parseStreamChunk(rawChunk);
+      if (parsed == null) continue;
+
+      if (parsed.finishReason != null) {
+        finishReason = parsed.finishReason;
+      }
+      if (parsed.usage != null) {
+        usage = parsed.usage;
+      }
+      yield parsed;
+    }
+
+    yield StreamChunk.done(
+      usage: usage,
+      finishReason: finishReason ?? FinishReason.stop,
+    );
+  }
+
+  /// Opens the provider-specific raw stream for [messages].
+  ///
+  /// Yields raw wire-format chunks (e.g. SSE lines) to be decoded by
+  /// [parseStreamChunk].
+  @protected
+  Stream<String> openStream(List<Message> messages);
+
+  /// Decodes a raw wire-format chunk into a [StreamChunk].
+  ///
+  /// Returns null for chunks that carry no event (comments, keep-alives...).
+  @protected
+  StreamChunk? parseStreamChunk(String rawChunk);
 
   /// Checks if a capability is supported.
   bool hasCapability(ModelCapability capability) =>
