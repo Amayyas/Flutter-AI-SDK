@@ -61,3 +61,7 @@ doc/api/
 *.tmp
 *.temp
 .cache/
+
+# Local working copy of the GitHub wiki (separate repository:
+# Flutter-AI-SDK.wiki.git) - synced and pushed independently
+wiki/
