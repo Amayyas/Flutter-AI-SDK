@@ -238,13 +238,56 @@ void main() {
       );
 
       final messages = body['messages'] as List<dynamic>;
-      final toolMessage = messages.last as Map<String, dynamic>;
+      // The user turn and the tool result are merged into one user message
+      // because Anthropic requires user/assistant roles to alternate.
+      expect(messages, hasLength(1));
+      final toolMessage = messages.single as Map<String, dynamic>;
       expect(toolMessage['role'], 'user');
       final blocks = toolMessage['content'] as List<dynamic>;
-      final block = blocks.single as Map<String, dynamic>;
+      final block = blocks.last as Map<String, dynamic>;
       expect(block['type'], 'tool_result');
       expect(block['tool_use_id'], 'call_1');
       expect(block['content'], '{"temp":20}');
+    });
+
+    test('keeps alternating roles when tool results follow assistant turns',
+        () async {
+      final body = await capturedBody(
+        const AIConfig(apiKey: 'key'),
+        messages: [
+          Message.user('Weather in Paris and Tokyo?'),
+          Message.assistant(
+            'Checking...',
+            toolCalls: const [
+              ToolCallContent(
+                id: 'call_1',
+                name: 'get_weather',
+                arguments: {'city': 'Paris'},
+              ),
+            ],
+          ),
+          Message.toolResult(
+            toolCallId: 'call_1',
+            name: 'get_weather',
+            result: 'sunny',
+          ),
+          Message.toolResult(
+            toolCallId: 'call_2',
+            name: 'get_weather',
+            result: 'rainy',
+          ),
+        ],
+      );
+
+      final messages = body['messages'] as List<dynamic>;
+      final roles = messages
+          .map((m) => (m as Map<String, dynamic>)['role'])
+          .toList();
+      // user / assistant / user (both tool results merged)
+      expect(roles, ['user', 'assistant', 'user']);
+      final lastBlocks =
+          (messages.last as Map<String, dynamic>)['content'] as List<dynamic>;
+      expect(lastBlocks, hasLength(2));
     });
 
     test('marks tool result errors with is_error', () async {

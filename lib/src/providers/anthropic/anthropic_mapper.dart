@@ -32,7 +32,9 @@ class AnthropicMapper {
 
     final body = <String, dynamic>{
       'model': model,
-      'messages': conversationMessages.map(formatMessage).toList(),
+      'messages': _mergeConsecutiveRoles(
+        conversationMessages.map(formatMessage).toList(),
+      ),
       'stream': stream,
     };
 
@@ -62,6 +64,26 @@ class AnthropicMapper {
     }
 
     return body;
+  }
+
+  /// Merges consecutive messages that map to the same wire role.
+  ///
+  /// The Anthropic API requires user/assistant roles to alternate; tool
+  /// results and regular user turns both map to the `user` role, so their
+  /// content blocks must be combined into a single message.
+  List<Map<String, dynamic>> _mergeConsecutiveRoles(
+    List<Map<String, dynamic>> messages,
+  ) {
+    final merged = <Map<String, dynamic>>[];
+    for (final message in messages) {
+      if (merged.isNotEmpty && merged.last['role'] == message['role']) {
+        (merged.last['content'] as List<dynamic>)
+            .addAll(message['content'] as List<dynamic>);
+      } else {
+        merged.add(message);
+      }
+    }
+    return merged;
   }
 
   /// Formats a message for the Anthropic API.
