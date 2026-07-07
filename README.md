@@ -2,6 +2,7 @@
 
 A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
 
+[![CI](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
 
 ## Features

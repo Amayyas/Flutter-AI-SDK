@@ -20,7 +20,9 @@ import 'package:flutter_ai_sdk/src/errors/errors.dart';
 /// ```
 class AIHttpClient {
   /// Creates an [AIHttpClient] with the given configuration.
-  AIHttpClient(this.config) : _dio = _createDio(config);
+  ///
+  /// A custom [dio] instance can be injected, mainly for testing.
+  AIHttpClient(this.config, {Dio? dio}) : _dio = dio ?? _createDio(config);
 
   /// The configuration.
   final AIConfig config;

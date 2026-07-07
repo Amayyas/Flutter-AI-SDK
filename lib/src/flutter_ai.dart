@@ -72,17 +72,20 @@ class FlutterAI {
   ///
   /// [provider] specifies which AI provider to use.
   /// [config] contains API key and other settings.
+  /// [customProvider] replaces the built-in provider implementation —
+  /// useful for plugging a custom [BaseProvider] or for testing.
   FlutterAI({
     required AIProvider provider,
     required AIConfig config,
     ContextManager? contextManager,
+    BaseProvider? customProvider,
   })  : _providerType = provider,
         _config = config,
         _contextManager = contextManager ??
             ContextManager(
               systemPrompt: config.systemPrompt,
             ),
-        _provider = _createProvider(provider, config);
+        _provider = customProvider ?? _createProvider(provider, config);
 
   /// The provider type.
   final AIProvider _providerType;
