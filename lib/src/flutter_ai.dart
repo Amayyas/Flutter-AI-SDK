@@ -20,7 +20,7 @@ import 'package:flutter_ai_sdk/src/providers/providers.dart';
 ///   provider: AIProvider.openai,
 ///   config: AIConfig(
 ///     apiKey: 'your-api-key',
-///     model: 'gpt-4-turbo',
+///     model: 'gpt-5.5',
 ///   ),
 /// );
 ///
@@ -58,7 +58,7 @@ import 'package:flutter_ai_sdk/src/providers/providers.dart';
 ///   provider: AIProvider.openai,
 ///   config: AIConfig(
 ///     apiKey: 'your-api-key',
-///     model: 'gpt-4-turbo',
+///     model: 'gpt-5.5',
 ///   ),
 /// );
 ///
@@ -81,7 +81,6 @@ class FlutterAI {
         _contextManager = contextManager ??
             ContextManager(
               systemPrompt: config.systemPrompt,
-              maxTokens: 8000,
             ),
         _provider = _createProvider(provider, config);
 
@@ -439,5 +438,5 @@ Summary:''';
 
   /// Checks if the provider supports a capability.
   bool hasCapability(ModelCapability capability) =>
-      (_provider).hasCapability(capability);
+      _provider.hasCapability(capability);
 }

@@ -10,15 +10,19 @@ import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 
 /// Anthropic (Claude) API provider implementation.
 ///
-/// Supports Claude 3 models (Opus, Sonnet, Haiku) with full
+/// Supports current Claude models (Opus, Sonnet, Haiku) with full
 /// support for streaming, vision, and tool use.
+///
+/// Note: recent Claude models (Opus 4.7+, Sonnet 5) reject the sampling
+/// parameters `temperature`, `topP` and the penalty parameters — leave them
+/// unset in [AIConfig] when targeting those models.
 ///
 /// Example:
 /// ```dart
 /// final provider = AnthropicProvider(
 ///   AIConfig(
 ///     apiKey: 'sk-ant-...',
-///     model: 'claude-3-5-sonnet-latest',
+///     model: 'claude-opus-4-8',
 ///   ),
 /// );
 ///
@@ -122,7 +126,7 @@ class AnthropicProvider extends BaseProvider {
     required bool stream,
   }) {
     // Separate system message from conversation
-    String? systemPrompt = config.systemPrompt;
+    var systemPrompt = config.systemPrompt;
     final conversationMessages = <Message>[];
 
     for (final message in messages) {
@@ -150,10 +154,11 @@ class AnthropicProvider extends BaseProvider {
       body['max_tokens'] = 4096;
     }
 
+    // Claude 4+ models reject requests carrying both temperature and top_p;
+    // send at most one, preferring temperature.
     if (config.temperature != null) {
       body['temperature'] = config.temperature;
-    }
-    if (config.topP != null) {
+    } else if (config.topP != null) {
       body['top_p'] = config.topP;
     }
     if (config.stopSequences != null) {
@@ -192,7 +197,7 @@ class AnthropicProvider extends BaseProvider {
                   'content':
                       tr.result is String ? tr.result : jsonEncode(tr.result),
                   if (tr.isError) 'is_error': true,
-                })
+                },)
             .toList(),
       };
     }
@@ -276,7 +281,7 @@ class AnthropicProvider extends BaseProvider {
             id: itemMap['id'] as String,
             name: itemMap['name'] as String,
             arguments: itemMap['input'] as Map<String, dynamic>,
-          ));
+          ),);
       }
     }
 
@@ -366,7 +371,9 @@ class AnthropicProvider extends BaseProvider {
         'end_turn' => FinishReason.stop,
         'stop_sequence' => FinishReason.stop,
         'max_tokens' => FinishReason.maxTokens,
+        'model_context_window_exceeded' => FinishReason.maxTokens,
         'tool_use' => FinishReason.toolCalls,
+        'refusal' => FinishReason.contentFilter,
         _ => FinishReason.unknown,
       };
 

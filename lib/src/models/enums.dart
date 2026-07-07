@@ -1,4 +1,5 @@
 /// Enumerations used throughout the Flutter AI SDK.
+library;
 
 /// Supported AI providers.
 ///
@@ -10,13 +11,13 @@
 /// );
 /// ```
 enum AIProvider {
-  /// OpenAI provider (GPT-4, GPT-3.5, etc.)
+  /// OpenAI provider (GPT-5.5, GPT-5.4, etc.)
   openai,
 
-  /// Anthropic provider (Claude 3 Opus, Sonnet, Haiku)
+  /// Anthropic provider (Claude Opus, Sonnet, Haiku)
   anthropic,
 
-  /// Google AI provider (Gemini Pro, Gemini Pro Vision)
+  /// Google AI provider (Gemini 3.x family)
   googleAI,
 }
 

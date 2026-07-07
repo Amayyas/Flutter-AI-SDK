@@ -11,7 +11,7 @@ import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 
 /// Google AI (Gemini) API provider implementation.
 ///
-/// Supports Gemini Pro and Gemini Pro Vision models with full
+/// Supports the Gemini 3.x model family with full
 /// support for streaming, multimodal input, and function calling.
 ///
 /// Example:
@@ -19,7 +19,7 @@ import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 /// final provider = GoogleAIProvider(
 ///   AIConfig(
 ///     apiKey: 'your-api-key',
-///     model: 'gemini-1.5-pro',
+///     model: 'gemini-3.5-flash',
 ///   ),
 /// );
 ///
@@ -108,7 +108,7 @@ class GoogleAIProvider extends BaseProvider {
   /// Builds the request body for the Google AI API.
   Map<String, dynamic> _buildRequestBody(List<Message> messages) {
     // Separate system message from conversation
-    String? systemPrompt = config.systemPrompt;
+    var systemPrompt = config.systemPrompt;
     final conversationMessages = <Message>[];
 
     for (final message in messages) {
@@ -195,7 +195,7 @@ class GoogleAIProvider extends BaseProvider {
                     'response':
                         tr.result is Map ? tr.result : {'result': tr.result},
                   },
-                })
+                },)
             .toList(),
       };
     }
@@ -319,7 +319,7 @@ class GoogleAIProvider extends BaseProvider {
               id: '${fc['name']}_${DateTime.now().millisecondsSinceEpoch}',
               name: fc['name'] as String,
               arguments: (fc['args'] as Map<String, dynamic>?) ?? {},
-            ));
+            ),);
           }
         }
       }
@@ -402,7 +402,7 @@ class GoogleAIProvider extends BaseProvider {
           id: '${fc['name']}_${DateTime.now().millisecondsSinceEpoch}',
           name: fc['name'] as String,
           arguments: (fc['args'] as Map<String, dynamic>?) ?? {},
-        ));
+        ),);
       }
 
       return null;

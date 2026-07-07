@@ -30,6 +30,25 @@ class Conversation {
         createdAt = createdAt ?? DateTime.now(),
         _updatedAt = DateTime.now();
 
+  /// Creates a [Conversation] from a JSON map.
+  factory Conversation.fromJson(Map<String, dynamic> json) {
+    final messagesList = json['messages'] as List<dynamic>?;
+    final messages = messagesList
+        ?.map((m) => Message.fromJson(m as Map<String, dynamic>))
+        .toList();
+
+    return Conversation(
+      id: json['id'] as String?,
+      title: json['title'] as String?,
+      systemPrompt: json['system_prompt'] as String?,
+      messages: messages,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
+
   /// Unique identifier for this conversation.
   final String id;
 
@@ -108,7 +127,7 @@ class Conversation {
       name: name,
       result: result,
       isError: isError,
-    ));
+    ),);
   }
 
   /// Removes a message by ID.
@@ -170,25 +189,6 @@ class Conversation {
         'updated_at': updatedAt.toIso8601String(),
         if (metadata != null) 'metadata': metadata,
       };
-
-  /// Creates a [Conversation] from a JSON map.
-  factory Conversation.fromJson(Map<String, dynamic> json) {
-    final messagesList = json['messages'] as List<dynamic>?;
-    final messages = messagesList
-        ?.map((m) => Message.fromJson(m as Map<String, dynamic>))
-        .toList();
-
-    return Conversation(
-      id: json['id'] as String?,
-      title: json['title'] as String?,
-      systemPrompt: json['system_prompt'] as String?,
-      messages: messages,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      metadata: json['metadata'] as Map<String, dynamic>?,
-    );
-  }
 
   @override
   bool operator ==(Object other) =>

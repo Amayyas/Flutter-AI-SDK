@@ -103,7 +103,7 @@ void main() {
       });
 
       test('hasToolCalls returns true when toolCalls is not empty', () {
-        final call = ToolCallContent(
+        const call = ToolCallContent(
           id: '1',
           name: 'test',
           arguments: {},
@@ -193,7 +193,7 @@ void main() {
         final original = Message.assistant(
           'Let me check that.',
           toolCalls: [
-            ToolCallContent(
+            const ToolCallContent(
               id: '1',
               name: 'weather',
               arguments: {'city': 'Paris'},
@@ -214,13 +214,13 @@ void main() {
           id: 'test-id',
           role: MessageRole.user,
           content: [const TextContent('Hello')],
-          createdAt: DateTime(2024, 1, 1),
+          createdAt: DateTime(2024),
         );
         final m2 = Message(
           id: 'test-id',
           role: MessageRole.user,
           content: [const TextContent('Hello')],
-          createdAt: DateTime(2024, 1, 1),
+          createdAt: DateTime(2024),
         );
 
         expect(m1, equals(m2));

@@ -153,7 +153,7 @@ final class AINetworkError extends AIError {
 
   @override
   String toString() =>
-      'AINetworkError: $message${isTimeout == true ? ' (timeout)' : ''}';
+      'AINetworkError: $message${isTimeout ?? false ? ' (timeout)' : ''}';
 }
 
 /// Error thrown when the server returns an error.

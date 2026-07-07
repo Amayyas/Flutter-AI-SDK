@@ -14,7 +14,7 @@ import 'package:flutter_ai_sdk/src/models/usage.dart';
 /// print(response.content); // Text content
 /// print(response.usage.totalTokens); // Token usage
 /// ```
-class AIResponse with EquatableMixin {
+class AIResponse with Equatable {
   /// Creates an [AIResponse].
   const AIResponse({
     required this.id,
@@ -139,7 +139,7 @@ class AIResponse with EquatableMixin {
 ///   }
 /// }
 /// ```
-class StreamChunk with EquatableMixin {
+class StreamChunk with Equatable {
   /// Creates a [StreamChunk].
   const StreamChunk({
     required this.type,

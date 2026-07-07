@@ -15,7 +15,7 @@ import 'package:flutter_ai_sdk/src/models/enums.dart';
 /// final content = TextContent('Hello, world!');
 /// final image = ImageContent.fromUrl('https://example.com/image.png');
 /// ```
-sealed class Content with EquatableMixin {
+sealed class Content with Equatable {
   /// Creates a [Content] with the given [type].
   const Content({required this.type});
 

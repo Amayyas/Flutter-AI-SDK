@@ -36,9 +36,9 @@ Future<void> basicOpenAIExample() async {
 
   final ai = FlutterAI(
     provider: AIProvider.openai,
-    config: AIConfig(
+    config: const AIConfig(
       apiKey: 'your-openai-api-key',
-      model: 'gpt-4-turbo',
+      model: 'gpt-5.5',
       temperature: 0.7,
       maxTokens: 1000,
     ),
@@ -64,9 +64,9 @@ Future<void> anthropicStreamingExample() async {
 
   final ai = FlutterAI(
     provider: AIProvider.anthropic,
-    config: AIConfig(
+    config: const AIConfig(
       apiKey: 'your-anthropic-api-key',
-      model: 'claude-3-5-sonnet-latest',
+      model: 'claude-opus-4-8',
       systemPrompt: 'You are a creative storyteller.',
     ),
   );
@@ -95,9 +95,9 @@ Future<void> googleAIVisionExample() async {
 
   final ai = FlutterAI(
     provider: AIProvider.googleAI,
-    config: AIConfig(
+    config: const AIConfig(
       apiKey: 'your-google-ai-api-key',
-      model: 'gemini-1.5-pro',
+      model: 'gemini-3.5-flash',
     ),
   );
 
@@ -105,7 +105,7 @@ Future<void> googleAIVisionExample() async {
     // Analyze an image from URL
     final response = await ai.chatWithContent([
       const TextContent(
-          'What can you see in this image? Describe it in detail.'),
+          'What can you see in this image? Describe it in detail.',),
       const ImageContent.fromUrl(
         'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/1200px-Camponotus_flavomarginatus_ant.jpg',
         detail: ImageDetail.high,
@@ -124,9 +124,9 @@ Future<void> functionCallingExample() async {
 
   final ai = FlutterAI(
     provider: AIProvider.openai,
-    config: AIConfig(
+    config: const AIConfig(
       apiKey: 'your-openai-api-key',
-      model: 'gpt-4-turbo',
+      model: 'gpt-5.5',
     ),
   );
 
@@ -208,9 +208,9 @@ Future<void> errorHandlingExample() async {
 
   final ai = FlutterAI(
     provider: AIProvider.openai,
-    config: AIConfig(
+    config: const AIConfig(
       apiKey: 'invalid-key', // This will cause an auth error
-      model: 'gpt-4-turbo',
+      model: 'gpt-5.5',
     ),
   );
 
@@ -254,7 +254,6 @@ Future<void> contextManagementExample() async {
     reservedTokens: 500,
     systemPrompt:
         'You are a helpful assistant that remembers our conversation.',
-    windowStrategy: WindowStrategy.slidingWindow,
   );
 
   // Listen to context updates
@@ -266,9 +265,9 @@ Future<void> contextManagementExample() async {
 
   final ai = FlutterAI(
     provider: AIProvider.openai,
-    config: AIConfig(
+    config: const AIConfig(
       apiKey: 'your-openai-api-key',
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-5.4-mini',
     ),
     contextManager: contextManager,
   );

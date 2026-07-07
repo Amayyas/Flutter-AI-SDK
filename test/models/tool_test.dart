@@ -118,20 +118,20 @@ void main() {
     });
 
     test('equality', () {
-      final tool1 = Tool(
+      const tool1 = Tool(
         name: 'same',
         description: 'Same tool',
-        parameters: const ToolParameters(properties: {}),
+        parameters: ToolParameters(properties: {}),
       );
-      final tool2 = Tool(
+      const tool2 = Tool(
         name: 'same',
         description: 'Same tool',
-        parameters: const ToolParameters(properties: {}),
+        parameters: ToolParameters(properties: {}),
       );
-      final tool3 = Tool(
+      const tool3 = Tool(
         name: 'different',
         description: 'Different tool',
-        parameters: const ToolParameters(properties: {}),
+        parameters: ToolParameters(properties: {}),
       );
 
       expect(tool1, equals(tool2));
@@ -287,22 +287,22 @@ void main() {
 
   group('ToolChoice', () {
     test('auto() creates auto choice', () {
-      final choice = ToolChoice.auto();
+      const choice = ToolChoice.auto();
       expect(choice, isA<AutoToolChoice>());
     });
 
     test('none() creates none choice', () {
-      final choice = ToolChoice.none();
+      const choice = ToolChoice.none();
       expect(choice, isA<NoneToolChoice>());
     });
 
     test('required() creates required choice', () {
-      final choice = ToolChoice.required();
+      const choice = ToolChoice.required();
       expect(choice, isA<RequiredToolChoice>());
     });
 
     test('tool() creates specific tool choice', () {
-      final choice = ToolChoice.tool('get_weather');
+      const choice = ToolChoice.tool('get_weather');
       expect(choice, isA<SpecificToolChoice>());
       expect((choice as SpecificToolChoice).name, 'get_weather');
     });

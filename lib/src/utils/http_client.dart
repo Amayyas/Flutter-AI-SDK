@@ -15,7 +15,7 @@ import 'package:flutter_ai_sdk/src/errors/errors.dart';
 /// final client = AIHttpClient(config);
 /// final response = await client.post(
 ///   'https://api.openai.com/v1/chat/completions',
-///   body: {'model': 'gpt-4', ...},
+///   body: {'model': 'gpt-5.5', ...},
 /// );
 /// ```
 class AIHttpClient {
@@ -41,7 +41,7 @@ class AIHttpClient {
         'Content-Type': 'application/json',
         ...?config.headers,
       },
-    ));
+    ),);
 
     // Add authorization header if not already in custom headers
     if (config.headers?['Authorization'] == null &&
@@ -178,12 +178,12 @@ class AIHttpClient {
             body = jsonDecode(data) as Map<String, dynamic>;
           } catch (_) {
             body = {
-              'error': {'message': data}
+              'error': {'message': data},
             };
           }
         } else {
           body = {
-            'error': {'message': 'Unknown error'}
+            'error': {'message': 'Unknown error'},
           };
         }
 

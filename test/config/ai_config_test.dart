@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 void main() {
   group('AIConfig', () {
     test('creates with required apiKey', () {
-      final config = AIConfig(apiKey: 'test-key');
+      const config = AIConfig(apiKey: 'test-key');
 
       expect(config.apiKey, 'test-key');
       expect(config.model, isNull);
@@ -13,7 +13,7 @@ void main() {
     });
 
     test('creates with all parameters', () {
-      final config = AIConfig(
+      const config = AIConfig(
         apiKey: 'test-key',
         model: 'gpt-4',
         temperature: 0.7,
@@ -23,7 +23,7 @@ void main() {
         frequencyPenalty: 0.2,
         systemPrompt: 'You are helpful.',
         stopSequences: ['END'],
-        timeout: const Duration(seconds: 60),
+        timeout: Duration(seconds: 60),
         baseUrl: 'https://custom.api.com',
       );
 
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('copyWith creates modified copy', () {
-      final original = AIConfig(
+      const original = AIConfig(
         apiKey: 'original-key',
         model: 'gpt-3.5',
         temperature: 0.5,
@@ -59,7 +59,7 @@ void main() {
     });
 
     test('copyWith preserves original values when not specified', () {
-      final original = AIConfig(
+      const original = AIConfig(
         apiKey: 'key',
         model: 'gpt-4',
         temperature: 0.7,
@@ -77,16 +77,16 @@ void main() {
     });
 
     test('equality', () {
-      final config1 = AIConfig(apiKey: 'key', model: 'gpt-4');
-      final config2 = AIConfig(apiKey: 'key', model: 'gpt-4');
-      final config3 = AIConfig(apiKey: 'key', model: 'gpt-3.5');
+      const config1 = AIConfig(apiKey: 'key', model: 'gpt-4');
+      const config2 = AIConfig(apiKey: 'key', model: 'gpt-4');
+      const config3 = AIConfig(apiKey: 'key', model: 'gpt-3.5');
 
       expect(config1, equals(config2));
       expect(config1, isNot(equals(config3)));
     });
 
     test('toJson serializes correctly', () {
-      final config = AIConfig(
+      const config = AIConfig(
         apiKey: 'test-key',
         model: 'gpt-4',
         temperature: 0.7,
@@ -105,7 +105,7 @@ void main() {
     });
 
     test('toJson omits null values', () {
-      final config = AIConfig(apiKey: 'test-key', model: 'gpt-4');
+      const config = AIConfig(apiKey: 'test-key', model: 'gpt-4');
 
       final json = config.toJson();
 
@@ -132,7 +132,7 @@ void main() {
       final config = AIConfig(
         apiKey: 'key',
         tools: [tool],
-        toolChoice: ToolChoice.auto(),
+        toolChoice: const ToolChoice.auto(),
       );
 
       expect(config.tools, hasLength(1));
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('supports metadata', () {
-      final config = AIConfig(
+      const config = AIConfig(
         apiKey: 'key',
         metadata: {'user_id': '123', 'session': 'abc'},
       );
@@ -150,7 +150,7 @@ void main() {
     });
 
     test('supports custom headers', () {
-      final config = AIConfig(
+      const config = AIConfig(
         apiKey: 'key',
         headers: {'X-Custom-Header': 'value'},
       );
@@ -161,27 +161,27 @@ void main() {
 
   group('ResponseFormat', () {
     test('text() creates text format', () {
-      final format = ResponseFormat.text();
+      const format = ResponseFormat.text();
       expect(format, isA<TextResponseFormat>());
     });
 
     test('text() toJson returns correct format', () {
-      final format = ResponseFormat.text();
+      const format = ResponseFormat.text();
       expect(format.toJson(), {'type': 'text'});
     });
 
     test('json() creates JSON format', () {
-      final format = ResponseFormat.json();
+      const format = ResponseFormat.json();
       expect(format, isA<JsonResponseFormat>());
     });
 
     test('json() toJson returns correct format', () {
-      final format = ResponseFormat.json();
+      const format = ResponseFormat.json();
       expect(format.toJson(), {'type': 'json_object'});
     });
 
     test('json() with schema includes schema in toJson', () {
-      final format = ResponseFormat.json(
+      const format = ResponseFormat.json(
         schema: {
           'type': 'object',
           'properties': {
@@ -197,10 +197,10 @@ void main() {
     });
 
     test('ResponseFormat equality', () {
-      final text1 = ResponseFormat.text();
-      final text2 = ResponseFormat.text();
-      final json1 = ResponseFormat.json();
-      final json2 = ResponseFormat.json();
+      const text1 = ResponseFormat.text();
+      const text2 = ResponseFormat.text();
+      const json1 = ResponseFormat.json();
+      const json2 = ResponseFormat.json();
 
       expect(text1, equals(text2));
       expect(json1, equals(json2));
@@ -210,30 +210,30 @@ void main() {
 
   group('DefaultModels', () {
     test('has OpenAI default model', () {
-      expect(DefaultModels.openai, 'gpt-4-turbo');
+      expect(DefaultModels.openai, 'gpt-5.5');
     });
 
     test('has Anthropic default model', () {
-      expect(DefaultModels.anthropic, 'claude-3-5-sonnet-latest');
+      expect(DefaultModels.anthropic, 'claude-opus-4-8');
     });
 
     test('has Google AI default model', () {
-      expect(DefaultModels.googleAI, 'gemini-1.5-pro');
+      expect(DefaultModels.googleAI, 'gemini-3.5-flash');
     });
 
     test('forProvider returns correct default for OpenAI', () {
-      expect(DefaultModels.forProvider(AIProvider.openai), 'gpt-4-turbo');
+      expect(DefaultModels.forProvider(AIProvider.openai), 'gpt-5.5');
     });
 
     test('forProvider returns correct default for Anthropic', () {
       expect(
         DefaultModels.forProvider(AIProvider.anthropic),
-        'claude-3-5-sonnet-latest',
+        'claude-opus-4-8',
       );
     });
 
     test('forProvider returns correct default for Google AI', () {
-      expect(DefaultModels.forProvider(AIProvider.googleAI), 'gemini-1.5-pro');
+      expect(DefaultModels.forProvider(AIProvider.googleAI), 'gemini-3.5-flash');
     });
   });
 
