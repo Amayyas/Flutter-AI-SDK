@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
-import 'package:flutter_ai_sdk/src/config/ai_config.dart';
+import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
 import 'package:flutter_ai_sdk/src/providers/base_provider.dart';
 import 'package:flutter_ai_sdk/src/utils/http_client.dart';

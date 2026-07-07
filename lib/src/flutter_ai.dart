@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_ai_sdk/src/config/ai_config.dart';
+import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/context/context_manager.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
 import 'package:flutter_ai_sdk/src/providers/providers.dart';

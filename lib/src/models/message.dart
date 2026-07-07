@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_ai_sdk/src/models/content.dart';
+import 'package:flutter_ai_sdk/src/models/content/content.dart';
 import 'package:flutter_ai_sdk/src/models/enums.dart';
 import 'package:uuid/uuid.dart';
 

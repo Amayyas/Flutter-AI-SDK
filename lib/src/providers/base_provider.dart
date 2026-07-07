@@ -1,4 +1,4 @@
-import 'package:flutter_ai_sdk/src/config/ai_config.dart';
+import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
 
 /// Base class for AI providers.

@@ -4,9 +4,10 @@
 library;
 
 export 'ai_response.dart';
-export 'content.dart';
+export 'content/content.dart';
 export 'conversation.dart';
 export 'enums.dart';
 export 'message.dart';
-export 'tool.dart';
+export 'stream_chunk.dart';
+export 'tools/tools.dart';
 export 'usage.dart';

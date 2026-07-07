@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:flutter_ai_sdk/src/models/enums.dart';
-import 'package:flutter_ai_sdk/src/models/tool.dart';
+import 'package:flutter_ai_sdk/src/config/response_format.dart';
+import 'package:flutter_ai_sdk/src/models/tools/tools.dart';
 
 /// Configuration for AI requests.
 ///
@@ -165,95 +165,4 @@ class AIConfig with Equatable {
         headers,
         metadata,
       ];
-}
-
-/// Response format configuration.
-///
-/// Controls the format of the model's output.
-sealed class ResponseFormat with Equatable {
-  /// Creates a [ResponseFormat].
-  const ResponseFormat();
-
-  /// Text response format (default).
-  const factory ResponseFormat.text() = TextResponseFormat;
-
-  /// JSON response format.
-  const factory ResponseFormat.json({Map<String, dynamic>? schema}) =
-      JsonResponseFormat;
-
-  /// Converts to a JSON-serializable map.
-  Map<String, dynamic> toJson();
-}
-
-/// Text response format.
-final class TextResponseFormat extends ResponseFormat {
-  /// Creates a [TextResponseFormat].
-  const TextResponseFormat();
-
-  @override
-  Map<String, dynamic> toJson() => {'type': 'text'};
-
-  @override
-  List<Object?> get props => [];
-}
-
-/// JSON response format.
-final class JsonResponseFormat extends ResponseFormat {
-  /// Creates a [JsonResponseFormat].
-  const JsonResponseFormat({this.schema});
-
-  /// Optional JSON schema for structured output.
-  final Map<String, dynamic>? schema;
-
-  @override
-  Map<String, dynamic> toJson() => {
-        'type': 'json_object',
-        if (schema != null) 'schema': schema,
-      };
-
-  @override
-  List<Object?> get props => [schema];
-}
-
-/// Default models for each provider.
-class DefaultModels {
-  DefaultModels._();
-
-  /// Default OpenAI model.
-  static const String openai = 'gpt-5.5';
-
-  /// Default Anthropic model.
-  static const String anthropic = 'claude-opus-4-8';
-
-  /// Default Google AI model.
-  static const String googleAI = 'gemini-3.5-flash';
-
-  /// Gets the default model for a provider.
-  static String forProvider(AIProvider provider) => switch (provider) {
-        AIProvider.openai => openai,
-        AIProvider.anthropic => anthropic,
-        AIProvider.googleAI => googleAI,
-      };
-}
-
-/// API endpoints for each provider.
-class APIEndpoints {
-  APIEndpoints._();
-
-  /// OpenAI API base URL.
-  static const String openai = 'https://api.openai.com/v1';
-
-  /// Anthropic API base URL.
-  static const String anthropic = 'https://api.anthropic.com/v1';
-
-  /// Google AI API base URL.
-  static const String googleAI =
-      'https://generativelanguage.googleapis.com/v1beta';
-
-  /// Gets the default endpoint for a provider.
-  static String forProvider(AIProvider provider) => switch (provider) {
-        AIProvider.openai => openai,
-        AIProvider.anthropic => anthropic,
-        AIProvider.googleAI => googleAI,
-      };
 }

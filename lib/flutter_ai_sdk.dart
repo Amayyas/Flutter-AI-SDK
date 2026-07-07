@@ -75,7 +75,7 @@
 /// ```
 library;
 
-export 'src/config/ai_config.dart';
+export 'src/config/config.dart';
 // Context Management
 export 'src/context/context.dart';
 // Errors
