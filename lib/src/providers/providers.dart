@@ -7,5 +7,6 @@ library;
 export 'anthropic/anthropic_provider.dart';
 export 'base_provider.dart';
 export 'google_ai/google_ai_provider.dart';
+export 'ollama/ollama_provider.dart';
 export 'openai/openai_provider.dart';
 export 'provider_registry.dart';

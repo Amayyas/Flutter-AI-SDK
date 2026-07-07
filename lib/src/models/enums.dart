@@ -19,6 +19,9 @@ enum AIProvider {
 
   /// Google AI provider (Gemini 3.x family)
   googleAI,
+
+  /// Ollama provider (locally hosted models: Llama, Qwen, Gemma...)
+  ollama,
 }
 
 /// Role of a message in a conversation.

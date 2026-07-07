@@ -13,11 +13,15 @@ class DefaultModels {
   /// Default Google AI model.
   static const String googleAI = 'gemini-3.5-flash';
 
+  /// Default Ollama model.
+  static const String ollama = 'llama3.1';
+
   /// Gets the default model for a provider.
   static String forProvider(AIProvider provider) => switch (provider) {
         AIProvider.openai => openai,
         AIProvider.anthropic => anthropic,
         AIProvider.googleAI => googleAI,
+        AIProvider.ollama => ollama,
       };
 }
 
@@ -35,10 +39,14 @@ class APIEndpoints {
   static const String googleAI =
       'https://generativelanguage.googleapis.com/v1beta';
 
+  /// Ollama API base URL (local server).
+  static const String ollama = 'http://localhost:11434/api';
+
   /// Gets the default endpoint for a provider.
   static String forProvider(AIProvider provider) => switch (provider) {
         AIProvider.openai => openai,
         AIProvider.anthropic => anthropic,
         AIProvider.googleAI => googleAI,
+        AIProvider.ollama => ollama,
       };
 }

@@ -3,6 +3,7 @@ import 'package:flutter_ai_sdk/src/models/enums.dart';
 import 'package:flutter_ai_sdk/src/providers/anthropic/anthropic_provider.dart';
 import 'package:flutter_ai_sdk/src/providers/base_provider.dart';
 import 'package:flutter_ai_sdk/src/providers/google_ai/google_ai_provider.dart';
+import 'package:flutter_ai_sdk/src/providers/ollama/ollama_provider.dart';
 import 'package:flutter_ai_sdk/src/providers/openai/openai_provider.dart';
 
 /// Signature for a function that builds a provider from a configuration.
@@ -28,6 +29,7 @@ class ProviderRegistry {
     AIProvider.openai: OpenAIProvider.new,
     AIProvider.anthropic: AnthropicProvider.new,
     AIProvider.googleAI: GoogleAIProvider.new,
+    AIProvider.ollama: OllamaProvider.new,
   };
 
   /// Creates a provider instance for [provider] with [config].
