@@ -1,115 +1,27 @@
-import 'dart:async';
 import 'dart:convert';
-
-import 'package:dio/dio.dart';
 
 import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/errors/errors.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
-import 'package:flutter_ai_sdk/src/providers/base_provider.dart';
-import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 
-/// OpenAI API provider implementation.
+/// Maps SDK models to and from the OpenAI wire format.
 ///
-/// Supports GPT-5.x and other OpenAI models with full
-/// support for streaming, vision, and function calling.
-///
-/// Example:
-/// ```dart
-/// final provider = OpenAIProvider(
-///   AIConfig(
-///     apiKey: 'sk-...',
-///     model: 'gpt-5.5',
-///   ),
-/// );
-///
-/// final response = await provider.chat([
-///   Message.user('Hello!'),
-/// ]);
-/// ```
-class OpenAIProvider extends BaseProvider {
-  /// Creates an [OpenAIProvider].
-  ///
-  /// A custom HTTP [client] can be injected, mainly for testing.
-  OpenAIProvider(super.config, {AIHttpClient? client})
-      : _client = client ?? AIHttpClient(config);
+/// Stateless translation layer used by `OpenAIProvider`:
+/// request building, response parsing and stream chunk decoding.
+class OpenAIMapper {
+  /// Creates an [OpenAIMapper].
+  const OpenAIMapper();
 
-  final AIHttpClient _client;
-
-  @override
-  AIProvider get providerType => AIProvider.openai;
-
-  @override
-  String get defaultModel => DefaultModels.openai;
-
-  @override
-  Set<ModelCapability> get capabilities => {
-        ModelCapability.text,
-        ModelCapability.vision,
-        ModelCapability.tools,
-        ModelCapability.jsonMode,
-        ModelCapability.streaming,
-        ModelCapability.systemPrompt,
-      };
-
-  /// OpenAI API endpoint for chat completions.
-  String get _chatEndpoint {
-    final base = config.baseUrl ?? APIEndpoints.openai;
-    return '$base/chat/completions';
-  }
-
-  @override
-  Future<AIResponse> chat(List<Message> messages) async {
-    validateConfig();
-
-    final body = _buildRequestBody(messages, stream: false);
-    final response = await _client.post(_chatEndpoint, body: body);
-
-    return _parseResponse(response);
-  }
-
-  @override
-  Stream<StreamChunk> streamChat(List<Message> messages) async* {
-    validateConfig();
-
-    final body = _buildRequestBody(messages, stream: true);
-
-    yield const StreamChunk.start();
-
-    final buffer = StringBuffer();
-    FinishReason? finishReason;
-    Usage? usage;
-
-    await for (final chunk in _client.postStream(_chatEndpoint, body: body)) {
-      final parsed = _parseStreamChunk(chunk);
-      if (parsed != null) {
-        if (parsed.isDelta && parsed.delta != null) {
-          buffer.write(parsed.delta);
-        }
-        if (parsed.finishReason != null) {
-          finishReason = parsed.finishReason;
-        }
-        if (parsed.usage != null) {
-          usage = parsed.usage;
-        }
-        yield parsed;
-      }
-    }
-
-    yield StreamChunk.done(
-      usage: usage,
-      finishReason: finishReason ?? FinishReason.stop,
-    );
-  }
-
-  /// Builds the request body for the OpenAI API.
-  Map<String, dynamic> _buildRequestBody(
+  /// Builds the request body for the OpenAI chat completions API.
+  Map<String, dynamic> buildRequestBody(
     List<Message> messages, {
+    required AIConfig config,
+    required String model,
     required bool stream,
   }) {
     final body = <String, dynamic>{
       'model': model,
-      'messages': messages.map(_formatMessage).toList(),
+      'messages': messages.map(formatMessage).toList(),
       'stream': stream,
     };
 
@@ -150,7 +62,7 @@ class OpenAIProvider extends BaseProvider {
   }
 
   /// Formats a message for the OpenAI API.
-  Map<String, dynamic> _formatMessage(Message message) {
+  Map<String, dynamic> formatMessage(Message message) {
     final formatted = <String, dynamic>{
       'role': message.role.name,
     };
@@ -159,7 +71,7 @@ class OpenAIProvider extends BaseProvider {
     if (message.isTextOnly) {
       formatted['content'] = message.text;
     } else {
-      formatted['content'] = message.content.map(_formatContent).toList();
+      formatted['content'] = message.content.map(formatContent).toList();
     }
 
     if (message.name != null) {
@@ -169,14 +81,16 @@ class OpenAIProvider extends BaseProvider {
     // Handle tool calls
     if (message.hasToolCalls) {
       formatted['tool_calls'] = message.toolCalls!
-          .map((tc) => {
-                'id': tc.id,
-                'type': 'function',
-                'function': {
-                  'name': tc.name,
-                  'arguments': jsonEncode(tc.arguments),
-                },
-              },)
+          .map(
+            (tc) => {
+              'id': tc.id,
+              'type': 'function',
+              'function': {
+                'name': tc.name,
+                'arguments': jsonEncode(tc.arguments),
+              },
+            },
+          )
           .toList();
     }
 
@@ -191,7 +105,7 @@ class OpenAIProvider extends BaseProvider {
   }
 
   /// Formats content for the OpenAI API.
-  Map<String, dynamic> _formatContent(Content content) {
+  Map<String, dynamic> formatContent(Content content) {
     switch (content) {
       case TextContent(:final text):
         return {'type': 'text', 'text': text};
@@ -204,9 +118,8 @@ class OpenAIProvider extends BaseProvider {
     }
   }
 
-  /// Parses a response from the OpenAI API.
-  AIResponse _parseResponse(Response<dynamic> response) {
-    final data = response.data as Map<String, dynamic>;
+  /// Parses a response body from the OpenAI API.
+  AIResponse parseResponse(Map<String, dynamic> data) {
     final choices = data['choices'] as List<dynamic>;
 
     if (choices.isEmpty) {
@@ -253,11 +166,11 @@ class OpenAIProvider extends BaseProvider {
     return AIResponse(
       id: data['id'] as String,
       content: content,
-      finishReason: _parseFinishReason(finishReasonStr),
+      finishReason: parseFinishReason(finishReasonStr),
       toolCalls: toolCalls,
       usage: usage,
       model: data['model'] as String?,
-      provider: providerType,
+      provider: AIProvider.openai,
       createdAt: DateTime.fromMillisecondsSinceEpoch(
         (data['created'] as int) * 1000,
       ),
@@ -265,8 +178,8 @@ class OpenAIProvider extends BaseProvider {
     );
   }
 
-  /// Parses a streaming chunk from the OpenAI API.
-  StreamChunk? _parseStreamChunk(String chunk) {
+  /// Parses a streaming SSE chunk from the OpenAI API.
+  StreamChunk? parseStreamChunk(String chunk) {
     // Handle SSE format
     if (!chunk.startsWith('data: ')) return null;
 
@@ -293,7 +206,7 @@ class OpenAIProvider extends BaseProvider {
       if (finishReasonStr != null) {
         final usageData = data['usage'] as Map<String, dynamic>?;
         return StreamChunk.done(
-          finishReason: _parseFinishReason(finishReasonStr),
+          finishReason: parseFinishReason(finishReasonStr),
           usage: usageData != null ? Usage.fromJson(usageData) : null,
         );
       }
@@ -329,16 +242,11 @@ class OpenAIProvider extends BaseProvider {
   }
 
   /// Parses a finish reason string.
-  FinishReason _parseFinishReason(String? reason) => switch (reason) {
+  FinishReason parseFinishReason(String? reason) => switch (reason) {
         'stop' => FinishReason.stop,
         'length' => FinishReason.maxTokens,
         'content_filter' => FinishReason.contentFilter,
         'tool_calls' => FinishReason.toolCalls,
         _ => FinishReason.unknown,
       };
-
-  @override
-  void dispose() {
-    _client.dispose();
-  }
 }

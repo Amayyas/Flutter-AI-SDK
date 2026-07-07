@@ -1,115 +1,22 @@
-import 'dart:async';
 import 'dart:convert';
-
-import 'package:dio/dio.dart';
 
 import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/errors/errors.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
-import 'package:flutter_ai_sdk/src/providers/base_provider.dart';
-import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 
-/// Google AI (Gemini) API provider implementation.
+/// Maps SDK models to and from the Google AI (Gemini) wire format.
 ///
-/// Supports the Gemini 3.x model family with full
-/// support for streaming, multimodal input, and function calling.
-///
-/// Example:
-/// ```dart
-/// final provider = GoogleAIProvider(
-///   AIConfig(
-///     apiKey: 'your-api-key',
-///     model: 'gemini-3.5-flash',
-///   ),
-/// );
-///
-/// final response = await provider.chat([
-///   Message.user('Hello!'),
-/// ]);
-/// ```
-class GoogleAIProvider extends BaseProvider {
-  /// Creates a [GoogleAIProvider].
-  ///
-  /// A custom HTTP [client] can be injected, mainly for testing.
-  GoogleAIProvider(super.config, {AIHttpClient? client})
-      : _client = client ?? AIHttpClient(config);
+/// Stateless translation layer used by `GoogleAIProvider`:
+/// request building, response parsing and stream chunk decoding.
+class GoogleAIMapper {
+  /// Creates a [GoogleAIMapper].
+  const GoogleAIMapper();
 
-  final AIHttpClient _client;
-
-  @override
-  AIProvider get providerType => AIProvider.googleAI;
-
-  @override
-  String get defaultModel => DefaultModels.googleAI;
-
-  @override
-  Set<ModelCapability> get capabilities => {
-        ModelCapability.text,
-        ModelCapability.vision,
-        ModelCapability.audio,
-        ModelCapability.tools,
-        ModelCapability.streaming,
-        ModelCapability.systemPrompt,
-      };
-
-  /// Google AI API endpoint for generating content.
-  String get _generateEndpoint {
-    final base = config.baseUrl ?? APIEndpoints.googleAI;
-    return '$base/models/$model:generateContent?key=${config.apiKey}';
-  }
-
-  /// Google AI API endpoint for streaming content.
-  String get _streamEndpoint {
-    final base = config.baseUrl ?? APIEndpoints.googleAI;
-    return '$base/models/$model:streamGenerateContent?key=${config.apiKey}&alt=sse';
-  }
-
-  @override
-  Future<AIResponse> chat(List<Message> messages) async {
-    validateConfig();
-
-    final body = _buildRequestBody(messages);
-    final response = await _client.post(_generateEndpoint, body: body);
-
-    return _parseResponse(response);
-  }
-
-  @override
-  Stream<StreamChunk> streamChat(List<Message> messages) async* {
-    validateConfig();
-
-    final body = _buildRequestBody(messages);
-
-    yield const StreamChunk.start();
-
-    final buffer = StringBuffer();
-    FinishReason? finishReason;
-    Usage? usage;
-
-    await for (final chunk in _client.postStream(_streamEndpoint, body: body)) {
-      final parsed = _parseStreamChunk(chunk);
-      if (parsed != null) {
-        if (parsed.isDelta && parsed.delta != null) {
-          buffer.write(parsed.delta);
-        }
-        if (parsed.finishReason != null) {
-          finishReason = parsed.finishReason;
-        }
-        if (parsed.usage != null) {
-          usage = parsed.usage;
-        }
-        yield parsed;
-      }
-    }
-
-    yield StreamChunk.done(
-      usage: usage,
-      finishReason: finishReason ?? FinishReason.stop,
-    );
-  }
-
-  /// Builds the request body for the Google AI API.
-  Map<String, dynamic> _buildRequestBody(List<Message> messages) {
+  /// Builds the request body for the Google AI generateContent API.
+  Map<String, dynamic> buildRequestBody(
+    List<Message> messages, {
+    required AIConfig config,
+  }) {
     // Separate system message from conversation
     var systemPrompt = config.systemPrompt;
     final conversationMessages = <Message>[];
@@ -123,7 +30,7 @@ class GoogleAIProvider extends BaseProvider {
     }
 
     final body = <String, dynamic>{
-      'contents': conversationMessages.map(_formatMessage).toList(),
+      'contents': conversationMessages.map(formatMessage).toList(),
     };
 
     if (systemPrompt != null && systemPrompt.isNotEmpty) {
@@ -177,7 +84,7 @@ class GoogleAIProvider extends BaseProvider {
   }
 
   /// Formats a message for the Google AI API.
-  Map<String, dynamic> _formatMessage(Message message) {
+  Map<String, dynamic> formatMessage(Message message) {
     final role = switch (message.role) {
       MessageRole.user => 'user',
       MessageRole.assistant => 'model',
@@ -192,13 +99,15 @@ class GoogleAIProvider extends BaseProvider {
       return {
         'role': role,
         'parts': toolResults
-            .map((tr) => {
-                  'functionResponse': {
-                    'name': tr.name,
-                    'response':
-                        tr.result is Map ? tr.result : {'result': tr.result},
-                  },
-                },)
+            .map(
+              (tr) => {
+                'functionResponse': {
+                  'name': tr.name,
+                  'response':
+                      tr.result is Map ? tr.result : {'result': tr.result},
+                },
+              },
+            )
             .toList(),
       };
     }
@@ -281,9 +190,10 @@ class GoogleAIProvider extends BaseProvider {
     };
   }
 
-  /// Parses a response from the Google AI API.
-  AIResponse _parseResponse(Response<dynamic> response) {
-    final data = response.data as Map<String, dynamic>;
+  /// Parses a response body from the Google AI API.
+  ///
+  /// [model] is echoed into the response since the API does not return it.
+  AIResponse parseResponse(Map<String, dynamic> data, {required String model}) {
     final candidates = data['candidates'] as List<dynamic>?;
 
     if (candidates == null || candidates.isEmpty) {
@@ -318,11 +228,13 @@ class GoogleAIProvider extends BaseProvider {
             content.add(TextContent(partMap['text'] as String));
           } else if (partMap.containsKey('functionCall')) {
             final fc = partMap['functionCall'] as Map<String, dynamic>;
-            toolCalls.add(ToolCallContent(
-              id: '${fc['name']}_${DateTime.now().millisecondsSinceEpoch}',
-              name: fc['name'] as String,
-              arguments: (fc['args'] as Map<String, dynamic>?) ?? {},
-            ),);
+            toolCalls.add(
+              ToolCallContent(
+                id: '${fc['name']}_${DateTime.now().millisecondsSinceEpoch}',
+                name: fc['name'] as String,
+                arguments: (fc['args'] as Map<String, dynamic>?) ?? {},
+              ),
+            );
           }
         }
       }
@@ -342,18 +254,18 @@ class GoogleAIProvider extends BaseProvider {
     return AIResponse(
       id: 'google-${DateTime.now().millisecondsSinceEpoch}',
       content: content,
-      finishReason: _parseFinishReason(finishReasonStr),
+      finishReason: parseFinishReason(finishReasonStr),
       toolCalls: toolCalls.isNotEmpty ? toolCalls : null,
       usage: usage,
       model: model,
-      provider: providerType,
+      provider: AIProvider.googleAI,
       createdAt: DateTime.now(),
       metadata: {'raw': data},
     );
   }
 
-  /// Parses a streaming chunk from the Google AI API.
-  StreamChunk? _parseStreamChunk(String chunk) {
+  /// Parses a streaming SSE chunk from the Google AI API.
+  StreamChunk? parseStreamChunk(String chunk) {
     // Handle SSE format
     if (!chunk.startsWith('data: ')) return null;
 
@@ -381,7 +293,7 @@ class GoogleAIProvider extends BaseProvider {
           );
         }
         return StreamChunk.done(
-          finishReason: _parseFinishReason(finishReasonStr),
+          finishReason: parseFinishReason(finishReasonStr),
           usage: usage,
         );
       }
@@ -401,11 +313,13 @@ class GoogleAIProvider extends BaseProvider {
       // Function call
       if (firstPart.containsKey('functionCall')) {
         final fc = firstPart['functionCall'] as Map<String, dynamic>;
-        return StreamChunk.toolCall(ToolCallContent(
-          id: '${fc['name']}_${DateTime.now().millisecondsSinceEpoch}',
-          name: fc['name'] as String,
-          arguments: (fc['args'] as Map<String, dynamic>?) ?? {},
-        ),);
+        return StreamChunk.toolCall(
+          ToolCallContent(
+            id: '${fc['name']}_${DateTime.now().millisecondsSinceEpoch}',
+            name: fc['name'] as String,
+            arguments: (fc['args'] as Map<String, dynamic>?) ?? {},
+          ),
+        );
       }
 
       return null;
@@ -415,7 +329,7 @@ class GoogleAIProvider extends BaseProvider {
   }
 
   /// Parses a finish reason string.
-  FinishReason _parseFinishReason(String? reason) => switch (reason) {
+  FinishReason parseFinishReason(String? reason) => switch (reason) {
         'STOP' => FinishReason.stop,
         'MAX_TOKENS' => FinishReason.maxTokens,
         'SAFETY' => FinishReason.contentFilter,
@@ -423,9 +337,4 @@ class GoogleAIProvider extends BaseProvider {
         'FUNCTION_CALL' => FinishReason.toolCalls,
         _ => FinishReason.unknown,
       };
-
-  @override
-  void dispose() {
-    _client.dispose();
-  }
 }
