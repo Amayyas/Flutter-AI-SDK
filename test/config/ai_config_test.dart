@@ -233,7 +233,8 @@ void main() {
     });
 
     test('forProvider returns correct default for Google AI', () {
-      expect(DefaultModels.forProvider(AIProvider.googleAI), 'gemini-3.5-flash');
+      expect(
+          DefaultModels.forProvider(AIProvider.googleAI), 'gemini-3.5-flash');
     });
   });
 

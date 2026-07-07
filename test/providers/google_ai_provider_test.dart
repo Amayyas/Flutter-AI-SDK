@@ -34,8 +34,8 @@ Map<String, dynamic> googleAIResponse({
           'finishReason': finishReason,
         },
       ],
-      'usageMetadata': usageMetadata ??
-          {'promptTokenCount': 10, 'candidatesTokenCount': 5},
+      'usageMetadata':
+          usageMetadata ?? {'promptTokenCount': 10, 'candidatesTokenCount': 5},
     };
 
 void main() {
@@ -53,11 +53,13 @@ void main() {
       GoogleAIProvider(config, client: client);
 
   void stubPost([Map<String, dynamic>? data]) {
-    when(() => client.post(
-          any(),
-          body: any(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).thenAnswer((_) async => jsonResponse(data ?? googleAIResponse()));
+    when(
+      () => client.post(
+        any(),
+        body: any(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer((_) async => jsonResponse(data ?? googleAIResponse()));
   }
 
   /// Runs a chat and returns the captured request body.
@@ -68,11 +70,13 @@ void main() {
     stubPost();
     final provider = buildProvider(config);
     await provider.chat(messages ?? [Message.user('Hi')]);
-    final captured = verify(() => client.post(
-          any(),
-          body: captureAny(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).captured;
+    final captured = verify(
+      () => client.post(
+        any(),
+        body: captureAny(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).captured;
     return captured.single as Map<String, dynamic>;
   }
 
@@ -96,11 +100,13 @@ void main() {
       );
       await provider.chat([Message.user('Hi')]);
 
-      final url = verify(() => client.post(
-            captureAny(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).captured.single as String;
+      final url = verify(
+        () => client.post(
+          captureAny(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).captured.single as String;
       expect(
         url,
         'https://generativelanguage.googleapis.com/v1beta'
@@ -237,8 +243,8 @@ void main() {
       final contents = body['contents'] as List<dynamic>;
       final parts =
           (contents.single as Map<String, dynamic>)['parts'] as List<dynamic>;
-      final inline = (parts.single
-          as Map<String, dynamic>)['inlineData'] as Map<String, dynamic>;
+      final inline = (parts.single as Map<String, dynamic>)['inlineData']
+          as Map<String, dynamic>;
       expect(inline['mimeType'], 'image/jpeg');
       expect(inline['data'], 'aGVsbG8=');
     });
@@ -259,8 +265,8 @@ void main() {
       final contents = body['contents'] as List<dynamic>;
       final parts =
           (contents.single as Map<String, dynamic>)['parts'] as List<dynamic>;
-      final fileData = (parts.single
-          as Map<String, dynamic>)['fileData'] as Map<String, dynamic>;
+      final fileData = (parts.single as Map<String, dynamic>)['fileData']
+          as Map<String, dynamic>;
       expect(fileData['fileUri'], 'https://example.com/a.png');
     });
 
@@ -284,8 +290,8 @@ void main() {
       final contents = body['contents'] as List<dynamic>;
       final parts =
           (contents.single as Map<String, dynamic>)['parts'] as List<dynamic>;
-      final call = (parts.last
-          as Map<String, dynamic>)['functionCall'] as Map<String, dynamic>;
+      final call = (parts.last as Map<String, dynamic>)['functionCall']
+          as Map<String, dynamic>;
       expect(call['name'], 'get_weather');
       expect(call['args'], {'city': 'Paris'});
     });
@@ -305,16 +311,18 @@ void main() {
     });
 
     test('parses functionCall parts into tool calls', () async {
-      stubPost(googleAIResponse(
-        parts: [
-          {
-            'functionCall': {
-              'name': 'get_weather',
-              'args': {'city': 'Paris'},
+      stubPost(
+        googleAIResponse(
+          parts: [
+            {
+              'functionCall': {
+                'name': 'get_weather',
+                'args': {'city': 'Paris'},
+              },
             },
-          },
-        ],
-      ),);
+          ],
+        ),
+      );
       final provider = buildProvider(const AIConfig(apiKey: 'key'));
       final response = await provider.chat([Message.user('Weather?')]);
 
@@ -366,11 +374,13 @@ void main() {
 
   group('streaming', () {
     void stubStream(List<String> lines) {
-      when(() => client.postStream(
-            any(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).thenAnswer((_) => Stream.fromIterable(lines));
+      when(
+        () => client.postStream(
+          any(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((_) => Stream.fromIterable(lines));
     }
 
     test('targets the streamGenerateContent SSE endpoint', () async {
@@ -380,11 +390,13 @@ void main() {
       );
       await provider.streamChat([Message.user('Hi')]).drain<void>();
 
-      final url = verify(() => client.postStream(
-            captureAny(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).captured.single as String;
+      final url = verify(
+        () => client.postStream(
+          captureAny(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).captured.single as String;
       expect(url, contains(':streamGenerateContent'));
       expect(url, contains('alt=sse'));
     });

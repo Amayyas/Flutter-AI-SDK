@@ -122,12 +122,14 @@ class Conversation {
     required dynamic result,
     bool isError = false,
   }) {
-    addMessage(Message.toolResult(
-      toolCallId: toolCallId,
-      name: name,
-      result: result,
-      isError: isError,
-    ),);
+    addMessage(
+      Message.toolResult(
+        toolCallId: toolCallId,
+        name: name,
+        result: result,
+        isError: isError,
+      ),
+    );
   }
 
   /// Removes a message by ID.

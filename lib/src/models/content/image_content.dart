@@ -85,6 +85,5 @@ final class ImageContent extends Content {
   List<Object?> get props => [type, url, data, mimeType, detail];
 
   @override
-  String toString() =>
-      'ImageContent(${url ?? "base64 data"}, detail: $detail)';
+  String toString() => 'ImageContent(${url ?? "base64 data"}, detail: $detail)';
 }

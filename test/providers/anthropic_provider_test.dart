@@ -47,11 +47,13 @@ void main() {
       AnthropicProvider(config, client: client);
 
   void stubPost([Map<String, dynamic>? data]) {
-    when(() => client.post(
-          any(),
-          body: any(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).thenAnswer((_) async => jsonResponse(data ?? anthropicResponse()));
+    when(
+      () => client.post(
+        any(),
+        body: any(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer((_) async => jsonResponse(data ?? anthropicResponse()));
   }
 
   /// Runs a chat and returns the captured request body.
@@ -62,11 +64,13 @@ void main() {
     stubPost();
     final provider = buildProvider(config);
     await provider.chat(messages ?? [Message.user('Hi')]);
-    final captured = verify(() => client.post(
-          any(),
-          body: captureAny(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).captured;
+    final captured = verify(
+      () => client.post(
+        any(),
+        body: captureAny(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).captured;
     return captured.single as Map<String, dynamic>;
   }
 
@@ -98,11 +102,13 @@ void main() {
       final provider = buildProvider(const AIConfig(apiKey: 'sk-ant-test'));
       await provider.chat([Message.user('Hi')]);
 
-      final captured = verify(() => client.post(
-            captureAny(),
-            body: any(named: 'body'),
-            headers: captureAny(named: 'headers'),
-          ),).captured;
+      final captured = verify(
+        () => client.post(
+          captureAny(),
+          body: any(named: 'body'),
+          headers: captureAny(named: 'headers'),
+        ),
+      ).captured;
 
       expect(captured[0], 'https://api.anthropic.com/v1/messages');
       final headers = captured[1] as Map<String, String>;
@@ -280,9 +286,8 @@ void main() {
       );
 
       final messages = body['messages'] as List<dynamic>;
-      final roles = messages
-          .map((m) => (m as Map<String, dynamic>)['role'])
-          .toList();
+      final roles =
+          messages.map((m) => (m as Map<String, dynamic>)['role']).toList();
       // user / assistant / user (both tool results merged)
       expect(roles, ['user', 'assistant', 'user']);
       final lastBlocks =
@@ -402,18 +407,20 @@ void main() {
     });
 
     test('parses tool_use blocks into tool calls', () async {
-      stubPost(anthropicResponse(
-        content: [
-          {'type': 'text', 'text': 'Checking...'},
-          {
-            'type': 'tool_use',
-            'id': 'call_1',
-            'name': 'get_weather',
-            'input': {'city': 'Paris'},
-          },
-        ],
-        stopReason: 'tool_use',
-      ),);
+      stubPost(
+        anthropicResponse(
+          content: [
+            {'type': 'text', 'text': 'Checking...'},
+            {
+              'type': 'tool_use',
+              'id': 'call_1',
+              'name': 'get_weather',
+              'input': {'city': 'Paris'},
+            },
+          ],
+          stopReason: 'tool_use',
+        ),
+      );
       final provider = buildProvider(const AIConfig(apiKey: 'key'));
       final response = await provider.chat([Message.user('Weather?')]);
 
@@ -446,11 +453,13 @@ void main() {
 
   group('streaming', () {
     void stubStream(List<String> lines) {
-      when(() => client.postStream(
-            any(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).thenAnswer((_) => Stream.fromIterable(lines));
+      when(
+        () => client.postStream(
+          any(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((_) => Stream.fromIterable(lines));
     }
 
     test('emits start, deltas and a final done chunk', () async {
@@ -474,10 +483,7 @@ void main() {
       final chunks = await provider.streamChat([Message.user('Hi')]).toList();
 
       expect(chunks.first.isStart, isTrue);
-      final text = chunks
-          .where((c) => c.isDelta)
-          .map((c) => c.delta)
-          .join();
+      final text = chunks.where((c) => c.isDelta).map((c) => c.delta).join();
       expect(text, 'Hello');
       final last = chunks.last;
       expect(last.isDone, isTrue);
@@ -494,8 +500,8 @@ void main() {
       final provider = buildProvider(const AIConfig(apiKey: 'key'));
       final chunks = await provider.streamChat([Message.user('Hi')]).toList();
 
-      final toolChunk = chunks
-          .firstWhere((c) => c.type == StreamEventType.toolCallDelta);
+      final toolChunk =
+          chunks.firstWhere((c) => c.type == StreamEventType.toolCallDelta);
       expect(toolChunk.metadata?['partial_json'], '{"city"');
     });
 
