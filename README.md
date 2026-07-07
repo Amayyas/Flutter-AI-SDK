@@ -3,15 +3,17 @@
 A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
 
 [![CI](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
 
 ## Features
 
 - 🔄 **Unified API** - Single interface for multiple AI providers
+- 🏠 **Local Models** - Run Llama, Qwen, Gemma... locally via Ollama
 - 🌊 **Streaming Support** - Real-time response streaming
 - 💬 **Context Management** - Automatic conversation history and memory
 - 🖼️ **Multimodal Support** - Text, images, audio, and documents
 - 🛠️ **Function Calling** - Tool/function support for all providers
+- 🤖 **Tool Runner** - Automatic agentic tool-calling loop
 - 🔒 **Type Safety** - Full Dart type safety with null safety
 - ⚡ **Error Handling** - Comprehensive error types and retry logic
 - 📊 **Token Counting** - Estimate token usage before requests
@@ -23,6 +25,7 @@ A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropi
 | OpenAI | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Anthropic | ✅ | ✅ | ❌ | ✅ | ✅ |
 | Google AI | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Ollama (local) | ✅ | ✅ | ❌ | ✅ | ✅ |
 
 ## Installation
 
@@ -169,6 +172,29 @@ if (response.hasToolCalls) {
     print(finalResponse.text);
   }
 }
+```
+
+### Tool Runner (automatic execution)
+
+Let the SDK run the full agentic loop for you: it executes every tool
+call the model requests and feeds the results back until the model
+produces a final answer.
+
+```dart
+final runner = ToolRunner.create(
+  provider: AIProvider.anthropic,
+  config: AIConfig(apiKey: 'sk-ant-...'),
+  tools: [
+    ExecutableTool(
+      definition: weatherTool,
+      executor: (args) async => fetchWeather(args['location'] as String),
+    ),
+  ],
+);
+
+final result = await runner.run('What is the weather in Paris?');
+print(result.text);       // Final answer
+print(result.iterations); // Number of tool rounds
 ```
 
 ### Error Handling
@@ -320,6 +346,49 @@ final ai = FlutterAI(
 ```
 
 Supported models: `gemini-3.5-flash`, `gemini-3.1-pro-preview`, `gemini-3.1-flash-lite`
+
+### Ollama (local models)
+
+Run open models locally — no API key, no cloud.
+
+```dart
+final ai = FlutterAI(
+  provider: AIProvider.ollama,
+  config: AIConfig(
+    apiKey: '', // not required
+    model: 'llama3.1',
+    // baseUrl: 'http://192.168.1.10:11434/api', // remote Ollama server
+  ),
+);
+```
+
+Popular models: `llama3.1`, `deepseek-r1`, `qwen3`, `gemma3`, `qwen3-coder`
+
+## Architecture
+
+The SDK is organized in small, focused modules:
+
+```
+lib/src/
+├── config/       # AIConfig, response formats, per-provider defaults
+├── models/       # Messages, content types (sealed), tools, responses
+├── providers/    # One folder per provider: thin provider + wire mapper
+│   ├── anthropic/  openai/  google_ai/  ollama/
+│   └── provider_registry.dart   # factory: AIProvider -> BaseProvider
+├── runner/       # ToolRunner: automatic tool-calling loop
+├── context/      # Conversation history and memory
+├── errors/       # Typed error hierarchy
+└── utils/        # HTTP client (retry, SSE/NDJSON), token counting
+```
+
+Key design points:
+
+- **Strategy + template method** - `BaseProvider` owns the streaming loop;
+  each provider only implements its transport and wire format
+- **Mappers** - request building / response parsing are stateless classes,
+  isolated from HTTP concerns and independently testable
+- **Factory registry** - `ProviderRegistry.register` lets you plug custom
+  provider implementations without forking the SDK
 
 ## Flutter Widget Integration
 
