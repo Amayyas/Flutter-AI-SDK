@@ -29,7 +29,10 @@ import 'package:flutter_ai_sdk/src/utils/http_client.dart';
 /// ```
 class GoogleAIProvider extends BaseProvider {
   /// Creates a [GoogleAIProvider].
-  GoogleAIProvider(super.config) : _client = AIHttpClient(config);
+  ///
+  /// A custom HTTP [client] can be injected, mainly for testing.
+  GoogleAIProvider(super.config, {AIHttpClient? client})
+      : _client = client ?? AIHttpClient(config);
 
   final AIHttpClient _client;
 
