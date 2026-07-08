@@ -2,6 +2,19 @@
 
 All notable changes to Flutter AI SDK are documented here.
 
+## 1.3.0 - 2026-07-08
+
+### Structured outputs & token counting
+
+- **Structured outputs**: `ResponseFormat.json(schema: ...)` now uses each
+  provider's native guaranteed-schema mechanism — OpenAI `json_schema`
+  (with opt-in `strict` mode), Anthropic `output_config.format`, Gemini
+  `responseJsonSchema`, Ollama schema format.
+- **Token counting**: new `countTokens` on providers and
+  `FlutterAI.countTokens({message})` on the facade — exact server-side
+  counts on Anthropic (`/messages/count_tokens`) and Google AI
+  (`:countTokens`); local estimation elsewhere.
+
 ## 1.2.0 - 2026-07-07
 
 ### Architecture overhaul & new features
