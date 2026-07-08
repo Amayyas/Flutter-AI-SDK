@@ -269,6 +269,34 @@ void main() {
       expect(function['arguments'], '{"city":"Paris"}');
     });
 
+    test('formats base64 documents as file blocks', () async {
+      final body = await capturedBody(
+        const AIConfig(apiKey: 'key'),
+        messages: [
+          Message(
+            role: MessageRole.user,
+            content: const [
+              TextContent('Summarize this'),
+              DocumentContent.fromBase64(
+                'aGVsbG8=',
+                mimeType: 'application/pdf',
+                name: 'report.pdf',
+              ),
+            ],
+          ),
+        ],
+      );
+
+      final messages = body['messages'] as List<dynamic>;
+      final content =
+          (messages.single as Map<String, dynamic>)['content'] as List<dynamic>;
+      final file = (content.last as Map<String, dynamic>)['file']
+          as Map<String, dynamic>;
+      expect((content.last as Map<String, dynamic>)['type'], 'file');
+      expect(file['filename'], 'report.pdf');
+      expect(file['file_data'], 'data:application/pdf;base64,aGVsbG8=');
+    });
+
     test('formats tool results with tool_call_id', () async {
       final body = await capturedBody(
         const AIConfig(apiKey: 'key'),
@@ -306,6 +334,21 @@ void main() {
         response.createdAt,
         DateTime.fromMillisecondsSinceEpoch(1751500000 * 1000),
       );
+    });
+
+    test('parses automatic prompt cache hits', () async {
+      stubPost(openAIResponse(
+        usage: {
+          'prompt_tokens': 1000,
+          'completion_tokens': 5,
+          'prompt_tokens_details': {'cached_tokens': 900},
+        },
+      ),);
+      final provider = buildProvider(const AIConfig(apiKey: 'key'));
+      final response = await provider.chat([Message.user('Hi')]);
+
+      expect(response.usage?.promptTokens, 1000);
+      expect(response.usage?.cachedTokens, 900);
     });
 
     test('parses tool calls and decodes their JSON arguments', () async {

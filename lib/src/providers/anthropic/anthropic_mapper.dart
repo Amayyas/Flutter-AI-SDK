@@ -63,6 +63,16 @@ class AnthropicMapper {
       }
     }
 
+    // Prompt caching: top-level cache_control auto-places a cache
+    // breakpoint on the last cacheable block of the request prefix.
+    final promptCaching = config.promptCaching;
+    if (promptCaching != null) {
+      body['cache_control'] = {
+        'type': 'ephemeral',
+        if (promptCaching.ttl == PromptCacheTtl.oneHour) 'ttl': '1h',
+      };
+    }
+
     // Structured outputs: Anthropic only supports schema-constrained JSON
     // (there is no plain "JSON mode" without a schema).
     final responseFormat = config.responseFormat;
@@ -195,7 +205,22 @@ class AnthropicMapper {
             'data': data,
           },
         };
-      case DocumentContent(:final data, :final mimeType, :final name):
+      case DocumentContent(
+          :final url,
+          :final data,
+          :final mimeType,
+          :final name
+        ):
+        if (url != null) {
+          return {
+            'type': 'document',
+            'source': {
+              'type': 'url',
+              'url': url,
+            },
+            if (name != null) 'name': name,
+          };
+        }
         return {
           'type': 'document',
           'source': {
@@ -235,15 +260,7 @@ class AnthropicMapper {
     }
 
     final stopReasonStr = data['stop_reason'] as String?;
-    final usageData = data['usage'] as Map<String, dynamic>?;
-
-    Usage? usage;
-    if (usageData != null) {
-      usage = Usage(
-        promptTokens: usageData['input_tokens'] as int? ?? 0,
-        completionTokens: usageData['output_tokens'] as int? ?? 0,
-      );
-    }
+    final usage = parseUsage(data['usage'] as Map<String, dynamic>?);
 
     return AIResponse(
       id: data['id'] as String,
@@ -292,16 +309,9 @@ class AnthropicMapper {
           final usageData = data['usage'] as Map<String, dynamic>?;
 
           if (stopReason != null || usageData != null) {
-            Usage? usage;
-            if (usageData != null) {
-              usage = Usage(
-                promptTokens: usageData['input_tokens'] as int? ?? 0,
-                completionTokens: usageData['output_tokens'] as int? ?? 0,
-              );
-            }
             return StreamChunk.done(
               finishReason: parseStopReason(stopReason),
-              usage: usage,
+              usage: parseUsage(usageData),
             );
           }
 
@@ -313,6 +323,17 @@ class AnthropicMapper {
     } catch (e) {
       return StreamChunk.error(e);
     }
+  }
+
+  /// Parses usage counters, including prompt cache reads and writes.
+  Usage? parseUsage(Map<String, dynamic>? usageData) {
+    if (usageData == null) return null;
+    return Usage(
+      promptTokens: usageData['input_tokens'] as int? ?? 0,
+      completionTokens: usageData['output_tokens'] as int? ?? 0,
+      cachedTokens: usageData['cache_read_input_tokens'] as int?,
+      cacheWriteTokens: usageData['cache_creation_input_tokens'] as int?,
+    );
   }
 
   /// Parses a stop reason string.

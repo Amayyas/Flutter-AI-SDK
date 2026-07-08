@@ -133,6 +133,25 @@ class OpenAIMapper {
         return content.toJson();
       case AudioContent():
         return content.toJson();
+      case DocumentContent(
+          :final url,
+          :final data,
+          :final mimeType,
+          :final name
+        ):
+        // OpenAI chat completions accept documents as base64 data URLs.
+        // URL-only documents are passed as a text reference (no native
+        // support) — see the document support table in the README.
+        if (data != null) {
+          return {
+            'type': 'file',
+            'file': {
+              'filename': name ?? 'document',
+              'file_data': 'data:$mimeType;base64,$data',
+            },
+          };
+        }
+        return {'type': 'text', 'text': 'Document: $url'};
       default:
         return {'type': 'text', 'text': content.toString()};
     }
@@ -177,11 +196,7 @@ class OpenAIMapper {
     }
 
     // Parse usage
-    Usage? usage;
-    final usageData = data['usage'] as Map<String, dynamic>?;
-    if (usageData != null) {
-      usage = Usage.fromJson(usageData);
-    }
+    final usage = parseUsage(data['usage'] as Map<String, dynamic>?);
 
     return AIResponse(
       id: data['id'] as String,
@@ -212,9 +227,9 @@ class OpenAIMapper {
 
       if (choices == null || choices.isEmpty) {
         // Check for usage data
-        final usageData = data['usage'] as Map<String, dynamic>?;
-        if (usageData != null) {
-          return StreamChunk.done(usage: Usage.fromJson(usageData));
+        final usage = parseUsage(data['usage'] as Map<String, dynamic>?);
+        if (usage != null) {
+          return StreamChunk.done(usage: usage);
         }
         return null;
       }
@@ -224,10 +239,9 @@ class OpenAIMapper {
       final finishReasonStr = choice['finish_reason'] as String?;
 
       if (finishReasonStr != null) {
-        final usageData = data['usage'] as Map<String, dynamic>?;
         return StreamChunk.done(
           finishReason: parseFinishReason(finishReasonStr),
-          usage: usageData != null ? Usage.fromJson(usageData) : null,
+          usage: parseUsage(data['usage'] as Map<String, dynamic>?),
         );
       }
 
@@ -259,6 +273,18 @@ class OpenAIMapper {
     } catch (e) {
       return StreamChunk.error(e);
     }
+  }
+
+  /// Parses usage counters, including automatic prompt cache hits.
+  Usage? parseUsage(Map<String, dynamic>? usageData) {
+    if (usageData == null) return null;
+    final details = usageData['prompt_tokens_details'] as Map<String, dynamic>?;
+    var usage = Usage.fromJson(usageData);
+    final cached = details?['cached_tokens'] as int?;
+    if (cached != null) {
+      usage = usage.copyWith(cachedTokens: cached);
+    }
+    return usage;
   }
 
   /// Parses a finish reason string.

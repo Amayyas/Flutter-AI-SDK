@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:flutter_ai_sdk/src/config/prompt_caching.dart';
 import 'package:flutter_ai_sdk/src/config/response_format.dart';
 import 'package:flutter_ai_sdk/src/models/tools/tools.dart';
 
@@ -32,6 +33,7 @@ class AIConfig with Equatable {
     this.tools,
     this.toolChoice,
     this.responseFormat,
+    this.promptCaching,
     this.baseUrl,
     this.timeout,
     this.headers,
@@ -82,6 +84,10 @@ class AIConfig with Equatable {
   /// Response format configuration.
   final ResponseFormat? responseFormat;
 
+  /// Prompt caching configuration (see [PromptCaching] for per-provider
+  /// behavior).
+  final PromptCaching? promptCaching;
+
   /// Custom base URL for the API.
   final String? baseUrl;
 
@@ -108,6 +114,7 @@ class AIConfig with Equatable {
     List<Tool>? tools,
     ToolChoice? toolChoice,
     ResponseFormat? responseFormat,
+    PromptCaching? promptCaching,
     String? baseUrl,
     Duration? timeout,
     Map<String, String>? headers,
@@ -126,6 +133,7 @@ class AIConfig with Equatable {
         tools: tools ?? this.tools,
         toolChoice: toolChoice ?? this.toolChoice,
         responseFormat: responseFormat ?? this.responseFormat,
+        promptCaching: promptCaching ?? this.promptCaching,
         baseUrl: baseUrl ?? this.baseUrl,
         timeout: timeout ?? this.timeout,
         headers: headers ?? this.headers,
@@ -160,6 +168,7 @@ class AIConfig with Equatable {
         tools,
         toolChoice,
         responseFormat,
+        promptCaching,
         baseUrl,
         timeout,
         headers,

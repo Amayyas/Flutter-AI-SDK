@@ -6,4 +6,5 @@ library;
 
 export 'ai_config.dart';
 export 'model_defaults.dart';
+export 'prompt_caching.dart';
 export 'response_format.dart';
