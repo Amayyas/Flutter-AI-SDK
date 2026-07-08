@@ -18,6 +18,7 @@ class Usage with Equatable {
     required this.promptTokens,
     required this.completionTokens,
     this.cachedTokens,
+    this.cacheWriteTokens,
   });
 
   /// Creates a [Usage] from a JSON map.
@@ -36,6 +37,9 @@ class Usage with Equatable {
   /// Number of tokens served from cache (if applicable).
   final int? cachedTokens;
 
+  /// Tokens written to the provider-side prompt cache (if reported).
+  final int? cacheWriteTokens;
+
   /// Total number of tokens (prompt + completion).
   int get totalTokens => promptTokens + completionTokens;
 
@@ -45,6 +49,7 @@ class Usage with Equatable {
         'completion_tokens': completionTokens,
         'total_tokens': totalTokens,
         if (cachedTokens != null) 'cached_tokens': cachedTokens,
+        if (cacheWriteTokens != null) 'cache_write_tokens': cacheWriteTokens,
       };
 
   /// Creates a copy with updated fields.
@@ -52,11 +57,13 @@ class Usage with Equatable {
     int? promptTokens,
     int? completionTokens,
     int? cachedTokens,
+    int? cacheWriteTokens,
   }) =>
       Usage(
         promptTokens: promptTokens ?? this.promptTokens,
         completionTokens: completionTokens ?? this.completionTokens,
         cachedTokens: cachedTokens ?? this.cachedTokens,
+        cacheWriteTokens: cacheWriteTokens ?? this.cacheWriteTokens,
       );
 
   /// Adds another usage to this one.
@@ -64,10 +71,13 @@ class Usage with Equatable {
         promptTokens: promptTokens + other.promptTokens,
         completionTokens: completionTokens + other.completionTokens,
         cachedTokens: (cachedTokens ?? 0) + (other.cachedTokens ?? 0),
+        cacheWriteTokens:
+            (cacheWriteTokens ?? 0) + (other.cacheWriteTokens ?? 0),
       );
 
   @override
-  List<Object?> get props => [promptTokens, completionTokens, cachedTokens];
+  List<Object?> get props =>
+      [promptTokens, completionTokens, cachedTokens, cacheWriteTokens];
 
   @override
   String toString() =>
