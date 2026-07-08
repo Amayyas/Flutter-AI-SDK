@@ -3,7 +3,7 @@
 A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
 
 [![CI](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Features
@@ -18,6 +18,7 @@ A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropi
 - 🔒 **Type Safety** - Full Dart type safety with null safety
 - ⚡ **Error Handling** - Comprehensive error types and retry logic
 - 📊 **Token Counting** - Exact counts via provider endpoints (Anthropic, Google AI) or local estimation
+- 💾 **Prompt Caching** - Up to 90% cheaper repeated contexts (`PromptCaching`)
 
 ## Supported Providers
 
@@ -128,6 +129,22 @@ final imageBytes = await File('image.png').readAsBytes();
 final response = await ai.chatWithContent([
   TextContent('Describe this image'),
   ImageContent.fromBytes(imageBytes, mimeType: 'image/png'),
+]);
+```
+
+### Document input support
+
+| Provider | Base64 (PDF...) | URL |
+|----------|:---------------:|:---:|
+| Anthropic | ✅ | ✅ |
+| Google AI | ✅ | ✅ |
+| OpenAI | ✅ | ⚠️ passed as a text reference |
+| Ollama | ❌ | ❌ |
+
+```dart
+final response = await ai.chatWithContent([
+  TextContent('Summarize this report'),
+  DocumentContent.fromBase64(base64Pdf, mimeType: 'application/pdf', name: 'report.pdf'),
 ]);
 ```
 
@@ -287,6 +304,34 @@ final ai = FlutterAI(
 final response = await ai.chat('Extract: John Smith, 42 years old');
 final data = jsonDecode(response.text); // guaranteed valid
 ```
+
+## Prompt Caching
+
+Cache the repeated prefix of your prompts (long system prompt, documents,
+conversation history) to cut input costs by up to ~90%:
+
+```dart
+final ai = FlutterAI(
+  provider: AIProvider.anthropic,
+  config: AIConfig(
+    apiKey: 'sk-ant-...',
+    systemPrompt: veryLongSystemPrompt,
+    promptCaching: PromptCaching(), // or PromptCaching(ttl: PromptCacheTtl.oneHour)
+  ),
+);
+
+final response = await ai.chat('First question');
+print(response.usage?.cacheWriteTokens); // prefix written to the cache
+final followUp = await ai.chat('Second question');
+print(followUp.usage?.cachedTokens);     // prefix read from the cache (~10% of the price)
+```
+
+| Provider | Behavior |
+|----------|----------|
+| Anthropic | Explicit — enabled by `promptCaching` (5 min or 1 h TTL) |
+| OpenAI | Automatic for prompts ≥ ~1024 tokens; hits reported in `usage.cachedTokens` |
+| Google AI | Implicit caching automatic; hits reported in `usage.cachedTokens` |
+| Ollama | Local KV-cache, always on |
 
 ## Token Counting
 

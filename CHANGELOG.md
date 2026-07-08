@@ -2,6 +2,18 @@
 
 All notable changes to Flutter AI SDK are documented here.
 
+## 1.4.0 - 2026-07-08
+
+### Prompt caching & universal document input
+
+- **Prompt caching**: new `AIConfig.promptCaching` (`PromptCaching`, 5 min or
+  1 h TTL) — explicit `cache_control` on Anthropic; cache hit counters parsed
+  on every provider (`Usage.cachedTokens`, new `Usage.cacheWriteTokens`).
+- **Documents**: `DocumentContent` now works on every cloud provider —
+  URL sources added on Anthropic, base64 `file` blocks added on OpenAI
+  (URL passed as a text reference), Google AI unchanged. Support table in
+  the README.
+
 ## 1.3.0 - 2026-07-08
 
 ### Structured outputs & token counting
