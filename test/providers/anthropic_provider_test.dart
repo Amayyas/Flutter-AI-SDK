@@ -233,6 +233,31 @@ void main() {
       expect(body.containsKey('output_config'), isFalse);
     });
 
+    test('enables prompt caching with the default TTL', () async {
+      final body = await capturedBody(
+        const AIConfig(apiKey: 'key', promptCaching: PromptCaching()),
+      );
+
+      expect(body['cache_control'], {'type': 'ephemeral'});
+    });
+
+    test('enables prompt caching with a one-hour TTL', () async {
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          promptCaching: PromptCaching(ttl: PromptCacheTtl.oneHour),
+        ),
+      );
+
+      expect(body['cache_control'], {'type': 'ephemeral', 'ttl': '1h'});
+    });
+
+    test('omits cache_control when prompt caching is unset', () async {
+      final body = await capturedBody(const AIConfig(apiKey: 'key'));
+
+      expect(body.containsKey('cache_control'), isFalse);
+    });
+
     test('formats tools in Anthropic format', () async {
       final tool = Tool(
         name: 'get_weather',
@@ -372,6 +397,35 @@ void main() {
       expect(toolUse['input'], {'city': 'Paris'});
     });
 
+    test('formats URL documents as url sources', () async {
+      final body = await capturedBody(
+        const AIConfig(apiKey: 'key'),
+        messages: [
+          Message(
+            role: MessageRole.user,
+            content: const [
+              DocumentContent.fromUrl(
+                'https://example.com/report.pdf',
+                mimeType: 'application/pdf',
+                name: 'report.pdf',
+              ),
+            ],
+          ),
+        ],
+      );
+
+      final messages = body['messages'] as List<dynamic>;
+      final message = messages.single as Map<String, dynamic>;
+      final blocks = message['content'] as List<dynamic>;
+      final doc = blocks.single as Map<String, dynamic>;
+      expect(doc['type'], 'document');
+      expect(doc['source'], {
+        'type': 'url',
+        'url': 'https://example.com/report.pdf',
+      });
+      expect(doc['name'], 'report.pdf');
+    });
+
     test('formats URL images as url sources', () async {
       final body = await capturedBody(
         const AIConfig(apiKey: 'key'),
@@ -434,6 +488,22 @@ void main() {
       expect(response.finishReason, FinishReason.stop);
       expect(response.usage?.promptTokens, 10);
       expect(response.usage?.completionTokens, 5);
+    });
+
+    test('parses prompt cache usage counters', () async {
+      stubPost(anthropicResponse(
+        usage: {
+          'input_tokens': 10,
+          'output_tokens': 5,
+          'cache_read_input_tokens': 900,
+          'cache_creation_input_tokens': 100,
+        },
+      ),);
+      final provider = buildProvider(const AIConfig(apiKey: 'key'));
+      final response = await provider.chat([Message.user('Hi')]);
+
+      expect(response.usage?.cachedTokens, 900);
+      expect(response.usage?.cacheWriteTokens, 100);
     });
 
     test('parses tool_use blocks into tool calls', () async {

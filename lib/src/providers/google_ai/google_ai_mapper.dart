@@ -294,6 +294,7 @@ class GoogleAIMapper {
           usage = Usage(
             promptTokens: usageData['promptTokenCount'] as int? ?? 0,
             completionTokens: usageData['candidatesTokenCount'] as int? ?? 0,
+            cachedTokens: usageData['cachedContentTokenCount'] as int?,
           );
         }
         return StreamChunk.done(

@@ -330,6 +330,20 @@ void main() {
       expect(response.usage?.completionTokens, 5);
     });
 
+    test('parses implicit cache hits from usageMetadata', () async {
+      stubPost(googleAIResponse(
+        usageMetadata: {
+          'promptTokenCount': 1000,
+          'candidatesTokenCount': 5,
+          'cachedContentTokenCount': 700,
+        },
+      ),);
+      final provider = buildProvider(const AIConfig(apiKey: 'key'));
+      final response = await provider.chat([Message.user('Hi')]);
+
+      expect(response.usage?.cachedTokens, 700);
+    });
+
     test('parses functionCall parts into tool calls', () async {
       stubPost(
         googleAIResponse(
