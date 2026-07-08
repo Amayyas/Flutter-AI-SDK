@@ -75,6 +75,29 @@ class GoogleAIProvider extends BaseProvider {
     );
   }
 
+  /// Google AI API endpoint for counting tokens.
+  String get _countTokensEndpoint {
+    final base = config.baseUrl ?? APIEndpoints.googleAI;
+    return '$base/models/$model:countTokens?key=${config.apiKey}';
+  }
+
+  @override
+  Future<int> countTokens(List<Message> messages) async {
+    validateConfig();
+
+    // The generateContentRequest wrapper counts the full prompt shape
+    // (contents + system instruction + tools), unlike the bare contents form.
+    final request = _mapper.buildRequestBody(messages, config: config)
+      ..remove('generationConfig')
+      ..['model'] = 'models/$model';
+    final response = await _client.post(
+      _countTokensEndpoint,
+      body: {'generateContentRequest': request},
+    );
+
+    return (response.data as Map<String, dynamic>)['totalTokens'] as int;
+  }
+
   @override
   Stream<String> openStream(List<Message> messages) {
     final body = _mapper.buildRequestBody(messages, config: config);

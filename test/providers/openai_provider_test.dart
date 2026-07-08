@@ -453,6 +453,23 @@ void main() {
     });
   });
 
+  group('countTokens', () {
+    test('falls back to local estimation without any HTTP call', () async {
+      final provider = buildProvider(const AIConfig(apiKey: 'key'));
+
+      final tokens = await provider.countTokens([
+        Message.user('Hello there, how are you today?'),
+      ]);
+
+      expect(tokens, greaterThan(0));
+      verifyNever(() => client.post(
+            any(),
+            body: any(named: 'body'),
+            headers: any(named: 'headers'),
+          ),);
+    });
+  });
+
   test('dispose releases the HTTP client', () {
     buildProvider(const AIConfig(apiKey: 'key')).dispose();
 
