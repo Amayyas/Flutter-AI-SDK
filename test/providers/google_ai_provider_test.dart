@@ -157,6 +157,26 @@ void main() {
       expect(config['responseMimeType'], 'application/json');
     });
 
+    test('sends responseJsonSchema when a schema is given', () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          responseFormat: JsonResponseFormat(schema: schema),
+        ),
+      );
+
+      final config = body['generationConfig'] as Map<String, dynamic>;
+      expect(config['responseMimeType'], 'application/json');
+      expect(config['responseJsonSchema'], schema);
+    });
+
     test('omits generationConfig when nothing is configured', () async {
       final body = await capturedBody(const AIConfig(apiKey: 'key'));
 
@@ -370,6 +390,35 @@ void main() {
         expect(response.finishReason, expected);
       });
     }
+  });
+
+  group('countTokens', () {
+    test('calls the countTokens endpoint with a generateContentRequest',
+        () async {
+      when(() => client.post(
+            any(),
+            body: any(named: 'body'),
+            headers: any(named: 'headers'),
+          ),).thenAnswer((_) async => jsonResponse({'totalTokens': 42}));
+      final provider = buildProvider(
+        const AIConfig(apiKey: 'g-key', maxTokens: 1024),
+      );
+
+      final tokens = await provider.countTokens([Message.user('Hi')]);
+
+      expect(tokens, 42);
+      final captured = verify(() => client.post(
+            captureAny(),
+            body: captureAny(named: 'body'),
+            headers: any(named: 'headers'),
+          ),).captured;
+      expect(captured[0] as String, contains(':countTokens'));
+      final body = captured[1] as Map<String, dynamic>;
+      final request = body['generateContentRequest'] as Map<String, dynamic>;
+      expect(request['model'], 'models/${DefaultModels.googleAI}');
+      expect(request.containsKey('contents'), isTrue);
+      expect(request.containsKey('generationConfig'), isFalse);
+    });
   });
 
   group('streaming', () {

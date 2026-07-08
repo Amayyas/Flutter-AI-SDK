@@ -63,7 +63,43 @@ class AnthropicMapper {
       }
     }
 
+    // Structured outputs: Anthropic only supports schema-constrained JSON
+    // (there is no plain "JSON mode" without a schema).
+    final responseFormat = config.responseFormat;
+    if (responseFormat is JsonResponseFormat && responseFormat.schema != null) {
+      body['output_config'] = {
+        'format': {
+          'type': 'json_schema',
+          'schema': responseFormat.schema,
+        },
+      };
+    }
+
     return body;
+  }
+
+  /// Builds the request body for the Anthropic count_tokens API.
+  ///
+  /// The endpoint only accepts the prompt-shaping fields of a messages
+  /// request (model, messages, system, tools, tool_choice).
+  Map<String, dynamic> buildCountTokensBody(
+    List<Message> messages, {
+    required AIConfig config,
+    required String model,
+  }) {
+    const allowedFields = {
+      'model',
+      'messages',
+      'system',
+      'tools',
+      'tool_choice',
+    };
+    return buildRequestBody(
+      messages,
+      config: config,
+      model: model,
+      stream: false,
+    )..removeWhere((key, _) => !allowedFields.contains(key));
   }
 
   /// Merges consecutive messages that map to the same wire role.

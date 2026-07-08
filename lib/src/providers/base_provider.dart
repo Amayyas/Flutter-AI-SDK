@@ -1,5 +1,6 @@
 import 'package:flutter_ai_sdk/src/config/config.dart';
 import 'package:flutter_ai_sdk/src/models/models.dart';
+import 'package:flutter_ai_sdk/src/utils/token_counter.dart';
 import 'package:meta/meta.dart';
 
 /// Base class for AI providers.
@@ -94,6 +95,19 @@ abstract class BaseProvider {
   /// Returns null for chunks that carry no event (comments, keep-alives...).
   @protected
   StreamChunk? parseStreamChunk(String rawChunk);
+
+  /// Counts the tokens the provider would read for [messages].
+  ///
+  /// The default implementation is a local heuristic estimation; providers
+  /// with a native token counting endpoint (Anthropic, Google AI) override
+  /// it with an exact server-side count.
+  Future<int> countTokens(List<Message> messages) async {
+    const counter = TokenCounter();
+    return counter.estimateMessagesTokens([
+      for (final message in messages)
+        {'role': message.role.name, 'content': message.text},
+    ]);
+  }
 
   /// Checks if a capability is supported.
   bool hasCapability(ModelCapability capability) =>

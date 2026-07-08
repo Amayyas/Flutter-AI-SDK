@@ -160,6 +160,24 @@ void main() {
       expect(body['format'], 'json');
     });
 
+    test('passes the JSON schema as format when given', () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: '',
+          responseFormat: JsonResponseFormat(schema: schema),
+        ),
+      );
+
+      expect(body['format'], schema);
+    });
+
     test('formats tools with the OpenAI function schema', () async {
       final tool = Tool(
         name: 'get_weather',

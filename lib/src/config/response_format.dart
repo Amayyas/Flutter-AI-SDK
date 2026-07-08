@@ -11,8 +11,15 @@ sealed class ResponseFormat with Equatable {
   const factory ResponseFormat.text() = TextResponseFormat;
 
   /// JSON response format.
-  const factory ResponseFormat.json({Map<String, dynamic>? schema}) =
-      JsonResponseFormat;
+  ///
+  /// With a [JsonResponseFormat.schema], providers that support structured
+  /// outputs (OpenAI, Anthropic, Google AI, Ollama) enforce the schema
+  /// natively. [JsonResponseFormat.strict] additionally opts into strict
+  /// schema validation on OpenAI.
+  const factory ResponseFormat.json({
+    Map<String, dynamic>? schema,
+    bool strict,
+  }) = JsonResponseFormat;
 
   /// Converts to a JSON-serializable map.
   Map<String, dynamic> toJson();
@@ -33,10 +40,19 @@ final class TextResponseFormat extends ResponseFormat {
 /// JSON response format.
 final class JsonResponseFormat extends ResponseFormat {
   /// Creates a [JsonResponseFormat].
-  const JsonResponseFormat({this.schema});
+  const JsonResponseFormat({this.schema, this.strict = false});
 
   /// Optional JSON schema for structured output.
+  ///
+  /// When provided, providers with native structured outputs guarantee the
+  /// response matches this schema instead of only producing valid JSON.
   final Map<String, dynamic>? schema;
+
+  /// Opts into strict schema validation where supported (OpenAI).
+  ///
+  /// Strict mode requires the schema to follow the provider's constraints
+  /// (e.g. `additionalProperties: false` on every object for OpenAI).
+  final bool strict;
 
   @override
   Map<String, dynamic> toJson() => {
@@ -45,5 +61,5 @@ final class JsonResponseFormat extends ResponseFormat {
       };
 
   @override
-  List<Object?> get props => [schema];
+  List<Object?> get props => [schema, strict];
 }

@@ -55,11 +55,31 @@ class OpenAIMapper {
       }
     }
     if (config.responseFormat != null) {
-      body['response_format'] = config.responseFormat!.toJson();
+      body['response_format'] = formatResponseFormat(config.responseFormat!);
     }
 
     return body;
   }
+
+  /// Formats a response format for the OpenAI API.
+  ///
+  /// A [JsonResponseFormat] with a schema uses the structured outputs
+  /// `json_schema` type (guaranteed schema); without a schema it falls
+  /// back to the legacy `json_object` JSON mode.
+  Map<String, dynamic> formatResponseFormat(ResponseFormat format) =>
+      switch (format) {
+        JsonResponseFormat(:final schema, :final strict) when schema != null =>
+          {
+            'type': 'json_schema',
+            'json_schema': {
+              'name': 'response',
+              if (strict) 'strict': true,
+              'schema': schema,
+            },
+          },
+        JsonResponseFormat() => {'type': 'json_object'},
+        TextResponseFormat() => {'type': 'text'},
+      };
 
   /// Formats a message for the OpenAI API.
   Map<String, dynamic> formatMessage(Message message) {

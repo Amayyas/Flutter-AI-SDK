@@ -55,8 +55,12 @@ class GoogleAIMapper {
     if (config.stopSequences != null) {
       generationConfig['stopSequences'] = config.stopSequences;
     }
-    if (config.responseFormat is JsonResponseFormat) {
+    final responseFormat = config.responseFormat;
+    if (responseFormat is JsonResponseFormat) {
       generationConfig['responseMimeType'] = 'application/json';
+      if (responseFormat.schema != null) {
+        generationConfig['responseJsonSchema'] = responseFormat.schema;
+      }
     }
     if (generationConfig.isNotEmpty) {
       body['generationConfig'] = generationConfig;

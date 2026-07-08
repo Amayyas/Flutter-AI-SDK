@@ -338,6 +338,27 @@ class FlutterAI {
     }
   }
 
+  /// Counts the tokens of the current context, optionally with [message]
+  /// appended as a user turn.
+  ///
+  /// Uses the provider's native token counting endpoint when available
+  /// (Anthropic, Google AI) and a local estimation otherwise.
+  ///
+  /// Example:
+  /// ```dart
+  /// final tokens = await ai.countTokens(message: 'Long prompt...');
+  /// if (tokens > 100000) {
+  ///   // Trim the context before sending
+  /// }
+  /// ```
+  Future<int> countTokens({String? message}) {
+    final messages = [
+      ..._contextManager.getMessagesForRequest(),
+      if (message != null) Message.user(message),
+    ];
+    return _provider.countTokens(messages);
+  }
+
   /// Clears the conversation context.
   void clearContext() {
     _contextManager.clear();

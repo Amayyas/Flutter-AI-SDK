@@ -88,6 +88,30 @@ class AnthropicProvider extends BaseProvider {
     return _mapper.parseResponse(response.data as Map<String, dynamic>);
   }
 
+  /// Anthropic count_tokens endpoint.
+  String get _countTokensEndpoint {
+    final base = config.baseUrl ?? APIEndpoints.anthropic;
+    return '$base/messages/count_tokens';
+  }
+
+  @override
+  Future<int> countTokens(List<Message> messages) async {
+    validateConfig();
+
+    final body = _mapper.buildCountTokensBody(
+      messages,
+      config: config,
+      model: model,
+    );
+    final response = await _client.post(
+      _countTokensEndpoint,
+      body: body,
+      headers: _headers,
+    );
+
+    return (response.data as Map<String, dynamic>)['input_tokens'] as int;
+  }
+
   @override
   Stream<String> openStream(List<Message> messages) {
     final body = _mapper.buildRequestBody(

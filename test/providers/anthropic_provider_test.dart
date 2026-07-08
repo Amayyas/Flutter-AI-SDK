@@ -203,6 +203,36 @@ void main() {
       expect(body['stop_sequences'], ['END']);
     });
 
+    test('uses output_config structured outputs when a schema is given',
+        () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          responseFormat: JsonResponseFormat(schema: schema),
+        ),
+      );
+
+      final outputConfig = body['output_config'] as Map<String, dynamic>;
+      final format = outputConfig['format'] as Map<String, dynamic>;
+      expect(format['type'], 'json_schema');
+      expect(format['schema'], schema);
+    });
+
+    test('omits output_config for schema-less JSON format', () async {
+      final body = await capturedBody(
+        const AIConfig(apiKey: 'key', responseFormat: JsonResponseFormat()),
+      );
+
+      expect(body.containsKey('output_config'), isFalse);
+    });
+
     test('formats tools in Anthropic format', () async {
       final tool = Tool(
         name: 'get_weather',
@@ -449,6 +479,38 @@ void main() {
         expect(response.finishReason, expected);
       });
     }
+  });
+
+  group('countTokens', () {
+    test('calls the count_tokens endpoint with prompt-shaping fields only',
+        () async {
+      when(() => client.post(
+            any(),
+            body: any(named: 'body'),
+            headers: any(named: 'headers'),
+          ),).thenAnswer((_) async => jsonResponse({'input_tokens': 42}));
+      final provider = buildProvider(
+        const AIConfig(apiKey: 'key', maxTokens: 1024, temperature: 0.5),
+      );
+
+      final tokens = await provider.countTokens([
+        Message.system('Be helpful.'),
+        Message.user('Hi'),
+      ]);
+
+      expect(tokens, 42);
+      final captured = verify(() => client.post(
+            captureAny(),
+            body: captureAny(named: 'body'),
+            headers: any(named: 'headers'),
+          ),).captured;
+      expect(captured[0], 'https://api.anthropic.com/v1/messages/count_tokens');
+      final body = captured[1] as Map<String, dynamic>;
+      expect(body['system'], 'Be helpful.');
+      expect(body.containsKey('max_tokens'), isFalse);
+      expect(body.containsKey('temperature'), isFalse);
+      expect(body.containsKey('stream'), isFalse);
+    });
   });
 
   group('streaming', () {

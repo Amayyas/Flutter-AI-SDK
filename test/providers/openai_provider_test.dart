@@ -164,6 +164,30 @@ void main() {
       );
     });
 
+    test('uses json_schema structured outputs when a schema is given',
+        () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          responseFormat: JsonResponseFormat(schema: schema, strict: true),
+        ),
+      );
+
+      final format = body['response_format'] as Map<String, dynamic>;
+      expect(format['type'], 'json_schema');
+      final jsonSchema = format['json_schema'] as Map<String, dynamic>;
+      expect(jsonSchema['name'], 'response');
+      expect(jsonSchema['strict'], isTrue);
+      expect(jsonSchema['schema'], schema);
+    });
+
     test('formats tools in OpenAI format', () async {
       final tool = Tool(
         name: 'get_weather',
@@ -426,6 +450,23 @@ void main() {
       final chunks = await provider.streamChat([Message.user('Hi')]).toList();
 
       expect(chunks.any((c) => c.isError), isTrue);
+    });
+  });
+
+  group('countTokens', () {
+    test('falls back to local estimation without any HTTP call', () async {
+      final provider = buildProvider(const AIConfig(apiKey: 'key'));
+
+      final tokens = await provider.countTokens([
+        Message.user('Hello there, how are you today?'),
+      ]);
+
+      expect(tokens, greaterThan(0));
+      verifyNever(() => client.post(
+            any(),
+            body: any(named: 'body'),
+            headers: any(named: 'headers'),
+          ),);
     });
   });
 

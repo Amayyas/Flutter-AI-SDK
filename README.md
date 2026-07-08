@@ -3,7 +3,7 @@
 A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
 
 [![CI](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Features
@@ -17,7 +17,7 @@ A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropi
 - 🤖 **Tool Runner** - Automatic agentic tool-calling loop
 - 🔒 **Type Safety** - Full Dart type safety with null safety
 - ⚡ **Error Handling** - Comprehensive error types and retry logic
-- 📊 **Token Counting** - Estimate token usage before requests
+- 📊 **Token Counting** - Exact counts via provider endpoints (Anthropic, Google AI) or local estimation
 
 ## Supported Providers
 
@@ -239,7 +239,13 @@ final config = AIConfig(
   systemPrompt: 'You are a helpful assistant.',
   
   // Response format
-  responseFormat: ResponseFormat.json(), // Force JSON output
+  responseFormat: ResponseFormat.json(), // JSON mode
+  // Or guaranteed structured output (OpenAI, Anthropic, Google AI, Ollama):
+  // responseFormat: ResponseFormat.json(schema: {
+  //   'type': 'object',
+  //   'properties': {'name': {'type': 'string'}},
+  //   'required': ['name'],
+  // }),
   
   // Tools/Functions
   tools: [myTool],
@@ -250,6 +256,49 @@ final config = AIConfig(
   timeout: Duration(seconds: 30),
   headers: {'X-Custom-Header': 'value'},
 );
+```
+
+## Structured Outputs
+
+Pass a JSON schema to get responses that are **guaranteed** to match it —
+each provider uses its native structured output mechanism (OpenAI
+`json_schema`, Anthropic `output_config`, Gemini `responseJsonSchema`,
+Ollama schema format):
+
+```dart
+final ai = FlutterAI(
+  provider: AIProvider.openai,
+  config: AIConfig(
+    apiKey: 'sk-...',
+    responseFormat: ResponseFormat.json(
+      schema: {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+          'age': {'type': 'integer'},
+        },
+        'required': ['name', 'age'],
+      },
+      strict: true, // strict validation (OpenAI)
+    ),
+  ),
+);
+
+final response = await ai.chat('Extract: John Smith, 42 years old');
+final data = jsonDecode(response.text); // guaranteed valid
+```
+
+## Token Counting
+
+Count tokens **before** sending a request — Anthropic and Google AI use
+their exact server-side counting endpoints; other providers fall back to
+a local estimation:
+
+```dart
+final tokens = await ai.countTokens(message: 'My long prompt...');
+if (tokens > 100000) {
+  // Trim the context before sending
+}
 ```
 
 ## Context Management
