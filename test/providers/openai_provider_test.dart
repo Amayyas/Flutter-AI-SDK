@@ -164,6 +164,30 @@ void main() {
       );
     });
 
+    test('uses json_schema structured outputs when a schema is given',
+        () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          responseFormat: JsonResponseFormat(schema: schema, strict: true),
+        ),
+      );
+
+      final format = body['response_format'] as Map<String, dynamic>;
+      expect(format['type'], 'json_schema');
+      final jsonSchema = format['json_schema'] as Map<String, dynamic>;
+      expect(jsonSchema['name'], 'response');
+      expect(jsonSchema['strict'], isTrue);
+      expect(jsonSchema['schema'], schema);
+    });
+
     test('formats tools in OpenAI format', () async {
       final tool = Tool(
         name: 'get_weather',

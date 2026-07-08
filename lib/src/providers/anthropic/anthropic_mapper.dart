@@ -63,6 +63,18 @@ class AnthropicMapper {
       }
     }
 
+    // Structured outputs: Anthropic only supports schema-constrained JSON
+    // (there is no plain "JSON mode" without a schema).
+    final responseFormat = config.responseFormat;
+    if (responseFormat is JsonResponseFormat && responseFormat.schema != null) {
+      body['output_config'] = {
+        'format': {
+          'type': 'json_schema',
+          'schema': responseFormat.schema,
+        },
+      };
+    }
+
     return body;
   }
 

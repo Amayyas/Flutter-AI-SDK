@@ -157,6 +157,26 @@ void main() {
       expect(config['responseMimeType'], 'application/json');
     });
 
+    test('sends responseJsonSchema when a schema is given', () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          responseFormat: JsonResponseFormat(schema: schema),
+        ),
+      );
+
+      final config = body['generationConfig'] as Map<String, dynamic>;
+      expect(config['responseMimeType'], 'application/json');
+      expect(config['responseJsonSchema'], schema);
+    });
+
     test('omits generationConfig when nothing is configured', () async {
       final body = await capturedBody(const AIConfig(apiKey: 'key'));
 

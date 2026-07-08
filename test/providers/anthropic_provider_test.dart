@@ -203,6 +203,36 @@ void main() {
       expect(body['stop_sequences'], ['END']);
     });
 
+    test('uses output_config structured outputs when a schema is given',
+        () async {
+      const schema = {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string'},
+        },
+        'required': ['name'],
+      };
+      final body = await capturedBody(
+        const AIConfig(
+          apiKey: 'key',
+          responseFormat: JsonResponseFormat(schema: schema),
+        ),
+      );
+
+      final outputConfig = body['output_config'] as Map<String, dynamic>;
+      final format = outputConfig['format'] as Map<String, dynamic>;
+      expect(format['type'], 'json_schema');
+      expect(format['schema'], schema);
+    });
+
+    test('omits output_config for schema-less JSON format', () async {
+      final body = await capturedBody(
+        const AIConfig(apiKey: 'key', responseFormat: JsonResponseFormat()),
+      );
+
+      expect(body.containsKey('output_config'), isFalse);
+    });
+
     test('formats tools in Anthropic format', () async {
       final tool = Tool(
         name: 'get_weather',

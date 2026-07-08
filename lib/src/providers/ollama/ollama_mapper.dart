@@ -45,8 +45,11 @@ class OllamaMapper {
       body['options'] = options;
     }
 
-    if (config.responseFormat is JsonResponseFormat) {
-      body['format'] = 'json';
+    // Structured outputs: Ollama accepts either 'json' (JSON mode) or a
+    // full JSON schema object as the format.
+    final responseFormat = config.responseFormat;
+    if (responseFormat is JsonResponseFormat) {
+      body['format'] = responseFormat.schema ?? 'json';
     }
 
     // Ollama uses the OpenAI function schema for tools.
