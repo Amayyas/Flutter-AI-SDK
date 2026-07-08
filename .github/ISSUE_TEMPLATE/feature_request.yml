@@ -1,0 +1,38 @@
+name: ✨ Feature request
+description: Suggest a new capability for the SDK
+title: "[FEATURE] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What are you trying to do that the SDK doesn't support today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would you like it to work? A sketch of the API you'd expect is welcome.
+      render: dart
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      multiple: true
+      options:
+        - New provider
+        - Existing provider capability
+        - Tool calling / ToolRunner
+        - Context / conversation management
+        - Streaming
+        - Other
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you're using today, or other designs you thought about.

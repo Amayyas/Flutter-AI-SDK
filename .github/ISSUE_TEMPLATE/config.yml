@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Questions & ideas
+    url: https://github.com/Amayyas/Flutter-AI-SDK/discussions
+    about: Ask questions or discuss ideas in GitHub Discussions
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/Amayyas/Flutter-AI-SDK/security
+    about: Please report vulnerabilities privately, never in a public issue
