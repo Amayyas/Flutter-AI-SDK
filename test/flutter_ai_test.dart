@@ -140,6 +140,25 @@ void main() {
     });
   });
 
+  group('countTokens', () {
+    test('delegates to the provider with context and extra message',
+        () async {
+      when(() => provider.chat(any())).thenAnswer((_) async => response('Hi'));
+      when(() => provider.countTokens(any())).thenAnswer((_) async => 42);
+      await ai.chat('Hello');
+
+      final tokens = await ai.countTokens(message: 'Follow-up');
+
+      expect(tokens, 42);
+      final sent = verify(() => provider.countTokens(captureAny()))
+          .captured
+          .single as List<Message>;
+      // context (user + assistant) + appended message
+      expect(sent, hasLength(3));
+      expect(sent.last.text, 'Follow-up');
+    });
+  });
+
   group('capabilities', () {
     test('hasCapability delegates to the provider', () {
       when(() => provider.hasCapability(ModelCapability.vision))
