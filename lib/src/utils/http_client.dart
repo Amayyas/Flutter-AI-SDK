@@ -35,15 +35,17 @@ class AIHttpClient {
 
   /// Creates a configured Dio instance.
   static Dio _createDio(AIConfig config) {
-    final dio = Dio(BaseOptions(
-      connectTimeout: config.timeout ?? const Duration(seconds: 30),
-      receiveTimeout: config.timeout ?? const Duration(minutes: 5),
-      sendTimeout: config.timeout ?? const Duration(minutes: 2),
-      headers: {
-        'Content-Type': 'application/json',
-        ...?config.headers,
-      },
-    ),);
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: config.timeout ?? const Duration(seconds: 30),
+        receiveTimeout: config.timeout ?? const Duration(minutes: 5),
+        sendTimeout: config.timeout ?? const Duration(minutes: 2),
+        headers: {
+          'Content-Type': 'application/json',
+          ...?config.headers,
+        },
+      ),
+    );
 
     // Add authorization header if not already in custom headers
     if (config.headers?['Authorization'] == null &&

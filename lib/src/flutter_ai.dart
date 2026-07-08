@@ -111,7 +111,6 @@ class FlutterAI {
   /// Gets the current conversation.
   Conversation get conversation => _contextManager.conversation;
 
-
   /// Sends a simple text message and gets a response.
   ///
   /// This is the simplest way to interact with the AI.

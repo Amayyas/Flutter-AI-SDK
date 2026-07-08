@@ -43,8 +43,7 @@ void main() {
   /// Stubs provider.chat to return [responses] one after the other.
   void stubChatSequence(List<AIResponse> responses) {
     final queue = [...responses];
-    when(() => provider.chat(any()))
-        .thenAnswer((_) async => queue.removeAt(0));
+    when(() => provider.chat(any())).thenAnswer((_) async => queue.removeAt(0));
   }
 
   group('run', () {
@@ -59,8 +58,7 @@ void main() {
       verify(() => provider.chat(any())).called(1);
     });
 
-    test('executes the tool and feeds the result back to the model',
-        () async {
+    test('executes the tool and feeds the result back to the model', () async {
       stubChatSequence([
         toolCallResponse(const [
           ToolCallContent(
@@ -173,8 +171,7 @@ void main() {
       expect(toolResult.result, contains('boom'));
     });
 
-    test('throws ToolRunnerException when maxIterations is exceeded',
-        () async {
+    test('throws ToolRunnerException when maxIterations is exceeded', () async {
       when(() => provider.chat(any())).thenAnswer(
         (_) async => toolCallResponse(const [
           ToolCallContent(

@@ -1,9 +1,15 @@
 name: flutter_ai_sdk
-description: A unified wrapper for integrating various AI APIs (OpenAI, Anthropic, Google AI) with streaming, context management, and multimodal support.
+description: A unified wrapper for AI APIs (OpenAI, Anthropic, Google AI, Ollama) with streaming, tool calling, context management, and multimodal support.
 version: 1.2.0
 homepage: https://github.com/Amayyas/Flutter-AI-SDK
 repository: https://github.com/Amayyas/Flutter-AI-SDK
 issue_tracker: https://github.com/Amayyas/Flutter-AI-SDK/issues
+topics:
+  - ai
+  - llm
+  - openai
+  - anthropic
+  - ollama
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

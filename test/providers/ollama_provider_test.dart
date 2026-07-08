@@ -45,11 +45,13 @@ void main() {
       OllamaProvider(config, client: client);
 
   void stubPost([Map<String, dynamic>? data]) {
-    when(() => client.post(
-          any(),
-          body: any(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).thenAnswer((_) async => jsonResponse(data ?? ollamaResponse()));
+    when(
+      () => client.post(
+        any(),
+        body: any(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer((_) async => jsonResponse(data ?? ollamaResponse()));
   }
 
   /// Runs a chat and returns the captured request body.
@@ -60,11 +62,13 @@ void main() {
     stubPost();
     final provider = buildProvider(config);
     await provider.chat(messages ?? [Message.user('Hi')]);
-    final captured = verify(() => client.post(
-          any(),
-          body: captureAny(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).captured;
+    final captured = verify(
+      () => client.post(
+        any(),
+        body: captureAny(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).captured;
     return captured.single as Map<String, dynamic>;
   }
 
@@ -95,11 +99,13 @@ void main() {
       final provider = buildProvider(const AIConfig(apiKey: ''));
       await provider.chat([Message.user('Hi')]);
 
-      final url = verify(() => client.post(
-            captureAny(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).captured.single;
+      final url = verify(
+        () => client.post(
+          captureAny(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).captured.single;
       expect(url, 'http://localhost:11434/api/chat');
     });
 
@@ -110,11 +116,13 @@ void main() {
       );
       await provider.chat([Message.user('Hi')]);
 
-      final url = verify(() => client.post(
-            captureAny(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).captured.single;
+      final url = verify(
+        () => client.post(
+          captureAny(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).captured.single;
       expect(url, 'http://192.168.1.10:11434/api/chat');
     });
 
@@ -221,10 +229,10 @@ void main() {
       );
 
       final messages = body['messages'] as List<dynamic>;
-      final toolCalls = (messages.single
-          as Map<String, dynamic>)['tool_calls'] as List<dynamic>;
-      final function = (toolCalls.single
-          as Map<String, dynamic>)['function'] as Map<String, dynamic>;
+      final toolCalls = (messages.single as Map<String, dynamic>)['tool_calls']
+          as List<dynamic>;
+      final function = (toolCalls.single as Map<String, dynamic>)['function']
+          as Map<String, dynamic>;
       expect(function['name'], 'get_weather');
       expect(function['arguments'], {'city': 'Paris'});
     });
@@ -265,20 +273,22 @@ void main() {
     });
 
     test('parses tool calls with generated IDs', () async {
-      stubPost(ollamaResponse(
-        message: {
-          'role': 'assistant',
-          'content': '',
-          'tool_calls': [
-            {
-              'function': {
-                'name': 'get_weather',
-                'arguments': {'city': 'Paris'},
+      stubPost(
+        ollamaResponse(
+          message: {
+            'role': 'assistant',
+            'content': '',
+            'tool_calls': [
+              {
+                'function': {
+                  'name': 'get_weather',
+                  'arguments': {'city': 'Paris'},
+                },
               },
-            },
-          ],
-        },
-      ),);
+            ],
+          },
+        ),
+      );
       final provider = buildProvider(const AIConfig(apiKey: ''));
       final response = await provider.chat([Message.user('Weather?')]);
 
@@ -307,11 +317,13 @@ void main() {
 
   group('streaming', () {
     void stubStream(List<String> lines) {
-      when(() => client.postStream(
-            any(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).thenAnswer((_) => Stream.fromIterable(lines));
+      when(
+        () => client.postStream(
+          any(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((_) => Stream.fromIterable(lines));
     }
 
     test('decodes NDJSON deltas and the final done line', () async {

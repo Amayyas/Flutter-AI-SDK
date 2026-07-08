@@ -84,9 +84,11 @@ class ToolRunner {
     ToolChoice? toolChoice,
     int maxIterations = 5,
     void Function(ToolCallContent call)? onToolCall,
-    void Function(ToolCallContent call, Object? result,
-            {required bool isError,})?
-        onToolResult,
+    void Function(
+      ToolCallContent call,
+      Object? result, {
+      required bool isError,
+    })? onToolResult,
   }) {
     final toolConfig = config.copyWith(
       tools: [for (final tool in tools) tool.definition],
@@ -111,8 +113,11 @@ class ToolRunner {
   final void Function(ToolCallContent call)? onToolCall;
 
   /// Called after a tool has executed (successfully or not).
-  final void Function(ToolCallContent call, Object? result,
-      {required bool isError,})? onToolResult;
+  final void Function(
+    ToolCallContent call,
+    Object? result, {
+    required bool isError,
+  })? onToolResult;
 
   final Map<String, ExecutableTool> _tools;
 

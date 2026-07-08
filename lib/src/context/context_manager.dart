@@ -209,11 +209,13 @@ class ContextManager {
 
   /// Emits a context update.
   void _emitUpdate(ContextUpdateType type) {
-    _updateController.add(ContextUpdate(
-      type: type,
-      messageCount: _conversation.length,
-      estimatedTokens: estimatedTokens,
-    ),);
+    _updateController.add(
+      ContextUpdate(
+        type: type,
+        messageCount: _conversation.length,
+        estimatedTokens: estimatedTokens,
+      ),
+    );
   }
 
   /// Disposes resources.

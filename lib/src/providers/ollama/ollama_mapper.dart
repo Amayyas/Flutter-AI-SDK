@@ -131,9 +131,8 @@ class OllamaMapper {
       usage: parseUsage(data),
       model: data['model'] as String?,
       provider: AIProvider.ollama,
-      createdAt:
-          DateTime.tryParse(data['created_at'] as String? ?? '') ??
-              DateTime.now(),
+      createdAt: DateTime.tryParse(data['created_at'] as String? ?? '') ??
+          DateTime.now(),
       metadata: {'raw': data},
     );
   }

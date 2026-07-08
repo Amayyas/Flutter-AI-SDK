@@ -25,7 +25,9 @@ import 'package:uuid/uuid.dart';
 class Message with Equatable {
   /// Creates a [Message] with the given properties.
   Message({
-    required this.role, required this.content, String? id,
+    required this.role,
+    required this.content,
+    String? id,
     this.name,
     this.toolCalls,
     DateTime? createdAt,
@@ -74,8 +76,10 @@ class Message with Equatable {
       );
 
   /// Creates an assistant message with text content.
-  factory Message.assistant(dynamic content,
-          {List<ToolCallContent>? toolCalls,}) =>
+  factory Message.assistant(
+    dynamic content, {
+    List<ToolCallContent>? toolCalls,
+  }) =>
       Message(
         role: MessageRole.assistant,
         content: _normalizeContent(content),

@@ -4,6 +4,7 @@ A unified Flutter/Dart wrapper for integrating various AI APIs (OpenAI, Anthropi
 
 [![CI](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/Amayyas/Flutter-AI-SDK/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/Amayyas/Flutter-AI-SDK)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Features
 
@@ -520,3 +521,7 @@ class _ChatWidgetState extends State<ChatWidget> {
 - 📖 [Documentation](https://github.com/Amayyas/Flutter-AI-SDK/wiki)
 - 🐛 [Issues](https://github.com/Amayyas/Flutter-AI-SDK/issues)
 - 💬 [Discussions](https://github.com/Amayyas/Flutter-AI-SDK/discussions)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

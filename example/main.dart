@@ -105,7 +105,8 @@ Future<void> googleAIVisionExample() async {
     // Analyze an image from URL
     final response = await ai.chatWithContent([
       const TextContent(
-          'What can you see in this image? Describe it in detail.',),
+        'What can you see in this image? Describe it in detail.',
+      ),
       const ImageContent.fromUrl(
         'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/1200px-Camponotus_flavomarginatus_ant.jpg',
         detail: ImageDetail.high,

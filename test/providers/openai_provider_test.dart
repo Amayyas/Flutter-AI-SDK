@@ -52,11 +52,13 @@ void main() {
       OpenAIProvider(config, client: client);
 
   void stubPost([Map<String, dynamic>? data]) {
-    when(() => client.post(
-          any(),
-          body: any(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).thenAnswer((_) async => jsonResponse(data ?? openAIResponse()));
+    when(
+      () => client.post(
+        any(),
+        body: any(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).thenAnswer((_) async => jsonResponse(data ?? openAIResponse()));
   }
 
   /// Runs a chat and returns the captured request body.
@@ -67,11 +69,13 @@ void main() {
     stubPost();
     final provider = buildProvider(config);
     await provider.chat(messages ?? [Message.user('Hi')]);
-    final captured = verify(() => client.post(
-          any(),
-          body: captureAny(named: 'body'),
-          headers: any(named: 'headers'),
-        ),).captured;
+    final captured = verify(
+      () => client.post(
+        any(),
+        body: captureAny(named: 'body'),
+        headers: any(named: 'headers'),
+      ),
+    ).captured;
     return captured.single as Map<String, dynamic>;
   }
 
@@ -102,11 +106,13 @@ void main() {
       final provider = buildProvider(const AIConfig(apiKey: 'key'));
       await provider.chat([Message.user('Hi')]);
 
-      final url = verify(() => client.post(
-            captureAny(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).captured.single;
+      final url = verify(
+        () => client.post(
+          captureAny(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).captured.single;
       expect(url, 'https://api.openai.com/v1/chat/completions');
     });
 
@@ -229,8 +235,8 @@ void main() {
       );
 
       final messages = body['messages'] as List<dynamic>;
-      final toolCalls = (messages.single
-          as Map<String, dynamic>)['tool_calls'] as List<dynamic>;
+      final toolCalls = (messages.single as Map<String, dynamic>)['tool_calls']
+          as List<dynamic>;
       final call = toolCalls.single as Map<String, dynamic>;
       expect(call['id'], 'call_1');
       expect(call['type'], 'function');
@@ -279,23 +285,25 @@ void main() {
     });
 
     test('parses tool calls and decodes their JSON arguments', () async {
-      stubPost(openAIResponse(
-        message: {
-          'role': 'assistant',
-          'content': null,
-          'tool_calls': [
-            {
-              'id': 'call_1',
-              'type': 'function',
-              'function': {
-                'name': 'get_weather',
-                'arguments': '{"city":"Paris"}',
+      stubPost(
+        openAIResponse(
+          message: {
+            'role': 'assistant',
+            'content': null,
+            'tool_calls': [
+              {
+                'id': 'call_1',
+                'type': 'function',
+                'function': {
+                  'name': 'get_weather',
+                  'arguments': '{"city":"Paris"}',
+                },
               },
-            },
-          ],
-        },
-        finishReason: 'tool_calls',
-      ),);
+            ],
+          },
+          finishReason: 'tool_calls',
+        ),
+      );
       final provider = buildProvider(const AIConfig(apiKey: 'key'));
       final response = await provider.chat([Message.user('Weather?')]);
 
@@ -335,11 +343,13 @@ void main() {
 
   group('streaming', () {
     void stubStream(List<String> lines) {
-      when(() => client.postStream(
-            any(),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).thenAnswer((_) => Stream.fromIterable(lines));
+      when(
+        () => client.postStream(
+          any(),
+          body: any(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).thenAnswer((_) => Stream.fromIterable(lines));
     }
 
     test('requests usage reporting in stream mode', () async {
@@ -347,11 +357,13 @@ void main() {
       final provider = buildProvider(const AIConfig(apiKey: 'key'));
       await provider.streamChat([Message.user('Hi')]).drain<void>();
 
-      final body = verify(() => client.postStream(
-            any(),
-            body: captureAny(named: 'body'),
-            headers: any(named: 'headers'),
-          ),).captured.single as Map<String, dynamic>;
+      final body = verify(
+        () => client.postStream(
+          any(),
+          body: captureAny(named: 'body'),
+          headers: any(named: 'headers'),
+        ),
+      ).captured.single as Map<String, dynamic>;
       expect(body['stream'], isTrue);
       expect(body['stream_options'], {'include_usage': true});
     });
@@ -360,12 +372,16 @@ void main() {
       stubStream([
         sse({
           'choices': [
-            {'delta': {'content': 'Hel'}},
+            {
+              'delta': {'content': 'Hel'},
+            },
           ],
         }),
         sse({
           'choices': [
-            {'delta': {'content': 'lo'}},
+            {
+              'delta': {'content': 'lo'},
+            },
           ],
         }),
         sse({
